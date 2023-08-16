@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Product {
+    private Integer id;
     private String name;
     private Long price;
     // make an object
