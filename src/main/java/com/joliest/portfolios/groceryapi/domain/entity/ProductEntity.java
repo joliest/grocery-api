@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Data
 @Builder
@@ -25,4 +27,5 @@ public class ProductEntity {
     private String category;
     private String subCategory;
     private String link;
+    private Date datePurchased;
 }
