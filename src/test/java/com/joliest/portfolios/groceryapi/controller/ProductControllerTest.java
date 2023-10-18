@@ -1,6 +1,7 @@
 package com.joliest.portfolios.groceryapi.controller;
 
 import com.joliest.portfolios.groceryapi.model.Product;
+import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,23 @@ class ProductControllerTest {
         List<Product> expected = getMockProducts();
         when(productService.getProducts()).thenReturn(expected);
         List<Product> actual = productController.getProducts();
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @Description("when add multiple products is called, it should add multiple products")
+    public void addMultipleProducts() {
+        //given
+        Products products = Products.builder()
+                .products(getMockProducts())
+                .build();
+
+        // when
+        List<Product> expected = getMockProducts();
+        when(productService.addMultipleProducts(products)).thenReturn(expected);
+        List<Product> actual = productController.addMultipleProducts(products);
 
         // then
         assertEquals(expected, actual);
