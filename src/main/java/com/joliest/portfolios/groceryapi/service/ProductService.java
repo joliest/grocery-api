@@ -52,7 +52,10 @@ public class ProductService {
     }
 
     public List<Product> addMultipleProducts(Products products) {
-        return Collections.emptyList();
+        List<Product> productList = products.getProducts();
+        return productList.stream()
+                .map(this::addProduct)
+                .collect(Collectors.toList());
     }
 
     private ProductEntity convertProductToEntity(Product product) {
