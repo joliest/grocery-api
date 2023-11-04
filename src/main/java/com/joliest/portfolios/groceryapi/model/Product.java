@@ -12,7 +12,7 @@ public class Product {
     // make an object
     private String store;
     private String category;
-    private String subCategory;
+    private String subcategory;
     private String link;
     private String datePurchased;
 }

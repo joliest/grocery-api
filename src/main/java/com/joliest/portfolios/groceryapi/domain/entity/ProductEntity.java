@@ -30,7 +30,7 @@ public class ProductEntity {
     private Long price;
     private String store;
     private String category;
-    private String subCategory;
+    private String subcategory;
     private String link;
     private LocalDateTime datePurchased;
 }
