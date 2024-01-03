@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
 public class DateUtil {
     public static String DEFAULT_DATE_FORMAT = "MM-dd-yyyy";
 
@@ -24,6 +26,7 @@ public class DateUtil {
      * @return a new LocalDateTime
      */
     public static LocalDateTime convertStrToLocalDateTime(String strDate) {
+        if (isEmpty(strDate)) return LocalDateTime.now();
         DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder()
                 .appendPattern(DEFAULT_DATE_FORMAT)
                 .optionalStart()
