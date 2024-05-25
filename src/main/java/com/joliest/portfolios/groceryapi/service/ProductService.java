@@ -64,16 +64,7 @@ public class ProductService {
 
     private ProductEntity convertProductToEntity(Product product) {
         String productStore = product.getStore();
-        Optional<StoreEntity> foundEntity = storeRepository
-                .findByName(product.getStore());
-        StoreEntity storeEntity;
-        if (foundEntity.isEmpty()) {
-            storeEntity = storeRepository.save(StoreEntity.builder()
-                    .name(productStore)
-                    .build());
-        } else {
-            storeEntity = foundEntity.get();
-        }
+        StoreEntity storeEntity = getProductStoreEntity(productStore);
         return ProductEntity.builder()
                 .name(product.getName())
                 .price(product.getPrice())
@@ -83,5 +74,19 @@ public class ProductService {
                 .datePurchased(convertStrToLocalDateTime(product.getDatePurchased()))
                 .store(storeEntity)
                 .build();
+    }
+
+    private StoreEntity getProductStoreEntity(String productStore) {
+        Optional<StoreEntity> foundEntity = storeRepository.findByName(productStore);
+        if (foundEntity.isEmpty()) {
+            return createNewStore(productStore);
+        }
+        return foundEntity.get();
+    }
+
+    private StoreEntity createNewStore(String productStore) {
+        return storeRepository.save(StoreEntity.builder()
+                .name(productStore)
+                .build());
     }
 }
