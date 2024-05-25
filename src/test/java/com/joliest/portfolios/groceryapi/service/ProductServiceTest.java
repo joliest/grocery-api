@@ -1,7 +1,9 @@
 package com.joliest.portfolios.groceryapi.service;
 
+import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
+import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
@@ -29,6 +31,8 @@ class ProductServiceTest {
     private ProductRepository productRepository;
     @Mock
     private StoreRepository storeRepository;
+    @Mock
+    private CategoryRepository categoryRepository;
     @InjectMocks
     private ProductService productService;
 
@@ -66,7 +70,9 @@ class ProductServiceTest {
         ProductEntity productEntityToSave = ProductEntity.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category("New Product Category")
+                .category(CategoryEntity.builder()
+                        .name("New Product Category")
+                        .build())
                 .subcategory("New Product Sub Category")
                 .price(100L)
                 .store(StoreEntity.builder()
@@ -77,7 +83,9 @@ class ProductServiceTest {
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category("New Product Category")
+                .category(CategoryEntity.builder()
+                        .name("New Product Category")
+                        .build())
                 .subcategory("New Product Sub Category")
                 .price(100L)
                 .store(StoreEntity.builder()
@@ -88,6 +96,10 @@ class ProductServiceTest {
         when(storeRepository.findByName("SM Supermarket"))
                 .thenReturn(Optional.of(StoreEntity.builder()
                         .name("SM Supermarket")
+                        .build()));
+        when(categoryRepository.findByName("New Product Category"))
+                .thenReturn(Optional.of(CategoryEntity.builder()
+                        .name("New Product Category")
                         .build()));
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
         Product newProduct = productService.addProduct(productParam);
@@ -120,15 +132,6 @@ class ProductServiceTest {
                                 .subcategory("Sub Category")
                                 .store("SM Supermarket")
                                 .datePurchased("04-21-2023")
-                                .build(),
-                        Product.builder()
-                                .name("Product Name 2")
-                                .category("Category")
-                                .link("http://link2")
-                                .price(150L)
-                                .subcategory("Sub Category")
-                                .store("Shopwise")
-                                .datePurchased("05-13-2023")
                                 .build())
                 ).build();
 
@@ -137,9 +140,15 @@ class ProductServiceTest {
                 .thenReturn(Optional.of(StoreEntity.builder()
                         .name("SM Supermarket")
                         .build()));
+        when(categoryRepository.findByName("Category"))
+                .thenReturn(Optional.of(CategoryEntity.builder()
+                        .name("Category")
+                        .build()));
         when(productRepository.save(ProductEntity.builder()
                 .name("Product Name 1")
-                .category("Category")
+                .category(CategoryEntity.builder()
+                        .name("Category")
+                        .build())
                 .link("http://link1")
                 .price(100L)
                 .subcategory("Sub Category")
@@ -150,38 +159,15 @@ class ProductServiceTest {
         )).thenReturn(ProductEntity.builder()
                 .id(1)
                 .name("Product Name 1")
-                .category("Category")
+                .category(CategoryEntity.builder()
+                        .name("Category")
+                        .build())
                 .link("http://link1")
                 .price(100L)
                 .subcategory("Sub Category")
                 .store(StoreEntity.builder()
                         .name("SM Supermarket").build())
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
-                .build());
-        when(storeRepository.findByName("Shopwise"))
-                .thenReturn(Optional.of(StoreEntity.builder()
-                        .name("Shopwise")
-                        .build()));
-        when(productRepository.save(ProductEntity.builder()
-                .name("Product Name 2")
-                .category("Category")
-                .link("http://link2")
-                .price(150L)
-                .subcategory("Sub Category")
-                .store(StoreEntity.builder()
-                        .name("Shopwise").build())
-                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
-                .build()
-        )).thenReturn(ProductEntity.builder()
-                .id(2)
-                .name("Product Name 2")
-                .category("Category")
-                .link("http://link2")
-                .price(150L)
-                .subcategory("Sub Category")
-                .store(StoreEntity.builder()
-                        .name("Shopwise").build())
-                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build());
         List<Product> expected = Arrays.asList(Product.builder()
                 .id(1)
@@ -192,15 +178,6 @@ class ProductServiceTest {
                 .subcategory("Sub Category")
                 .store("SM Supermarket")
                 .datePurchased("04-21-2023")
-                .build(), Product.builder()
-                .id(2)
-                .name("Product Name 2")
-                .category("Category")
-                .link("http://link2")
-                .price(150L)
-                .subcategory("Sub Category")
-                .store("Shopwise")
-                .datePurchased("05-13-2023")
                 .build());
         List<Product> actual = productService.addMultipleProducts(products);
 
@@ -226,7 +203,9 @@ class ProductServiceTest {
         ProductEntity productEntityToSave = ProductEntity.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category("New Product Category")
+                .category(CategoryEntity.builder()
+                        .name("New Product Category")
+                        .build())
                 .subcategory("New Product Sub Category")
                 .price(100L)
                 .store(StoreEntity.builder()
@@ -237,7 +216,9 @@ class ProductServiceTest {
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category("New Product Category")
+                .category(CategoryEntity.builder()
+                        .name("New Product Category")
+                        .build())
                 .subcategory("New Product Sub Category")
                 .price(100L)
                 .store(StoreEntity.builder()
@@ -249,6 +230,12 @@ class ProductServiceTest {
                 .thenReturn(Optional.empty());
         when(storeRepository.save(StoreEntity.builder().name("SM Supermarket").build()))
                 .thenReturn(StoreEntity.builder().name("SM Supermarket").build());
+
+        when(categoryRepository.findByName("New Product Category"))
+                .thenReturn(Optional.empty());
+        when(categoryRepository.save(CategoryEntity.builder().name("New Product Category").build()))
+                .thenReturn(CategoryEntity.builder().name("New Product Category").build());
+
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
         Product newProduct = productService.addProduct(productParam);
 
@@ -304,7 +291,9 @@ class ProductServiceTest {
                 ProductEntity.builder()
                         .id(1)
                         .name("Product Name 1")
-                        .category("Category")
+                        .category(CategoryEntity.builder()
+                                .name("Category")
+                                .build())
                         .link("http://link1")
                         .price(100L)
                         .subcategory("Sub Category")
@@ -315,7 +304,9 @@ class ProductServiceTest {
                 ProductEntity.builder()
                         .id(2)
                         .name("Product Name 2")
-                        .category("Category")
+                        .category(CategoryEntity.builder()
+                                .name("Category")
+                                .build())
                         .link("http://link2")
                         .price(150L)
                         .subcategory("Sub Category")

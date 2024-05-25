@@ -28,8 +28,8 @@ public class StoreService {
         List<StoreEntity> storeEntities = stores.stream()
                 .map(store -> StoreEntity.builder()
                         .name(store.getName())
-                            .description(store.getDescription())
-                            .build())
+                        .description(store.getDescription())
+                        .build())
                 .collect(Collectors.toList());
         List<StoreEntity> savedStores = storeRepository.saveAll(storeEntities);
         return savedStores.stream().map(storeEntity -> Store.builder()
