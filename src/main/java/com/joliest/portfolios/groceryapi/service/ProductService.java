@@ -6,7 +6,6 @@ import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
-import com.joliest.portfolios.groceryapi.model.Store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +29,7 @@ public class ProductService {
                                 .id(productEntity.getId())
                                 .name(productEntity.getName())
                                 .price(productEntity.getPrice())
-                                .store(Store.builder()
-                                        .id(productEntity.getStore().getId())
-                                        .name(productEntity.getStore().getName())
-                                        .description(productEntity.getStore().getDescription())
-                                        .build())
+                                .store(productEntity.getStore().getName())
                                 .category(productEntity.getCategory())
                                 .subcategory(productEntity.getSubcategory())
                                 .link(productEntity.getLink())
@@ -56,11 +51,7 @@ public class ProductService {
                 .subcategory(productEntity.getSubcategory())
                 .link(productEntity.getLink())
                 .datePurchased(convertDateToDefaultFormat(productEntity.getDatePurchased()))
-                .store(Store.builder()
-                        .id(productEntity.getStore().getId())
-                        .name(productEntity.getStore().getName())
-                        .description(productEntity.getStore().getDescription())
-                        .build())
+                .store(productEntity.getStore().getName())
                 .build();
     }
 
@@ -72,14 +63,13 @@ public class ProductService {
     }
 
     private ProductEntity convertProductToEntity(Product product) {
-        Store productStore = product.getStore();
+        String productStore = product.getStore();
         Optional<StoreEntity> foundEntity = storeRepository
-                .findByIdOrName(productStore.getId(), productStore.getName());
+                .findByName(product.getStore());
         StoreEntity storeEntity;
         if (foundEntity.isEmpty()) {
             storeEntity = storeRepository.save(StoreEntity.builder()
-                    .name(productStore.getName())
-                    .description(productStore.getDescription())
+                    .name(productStore)
                     .build());
         } else {
             storeEntity = foundEntity.get();

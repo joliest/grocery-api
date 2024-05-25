@@ -3,9 +3,9 @@ package com.joliest.portfolios.groceryapi.controller;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
-import com.joliest.portfolios.groceryapi.model.Store;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,11 +25,14 @@ import static java.util.Arrays.asList;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ProductControllerIntegrationTest {
     private static final String MOCK_STRING_DATE_2 = "05-13-2023";
+    private static final String MOCK_STORE_NAME = "sample store";
 
     static String PRODUCTS_URI = "/v1/products";
 
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private StoreRepository storeRepository;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -51,6 +54,7 @@ class ProductControllerIntegrationTest {
     @Test
     @Description("Post Product")
     public void postProduct() {
+        int storeId = setupStore();
         Products requestBody = createRequestBody();
         webTestClient
                 .post()
@@ -64,6 +68,7 @@ class ProductControllerIntegrationTest {
                 .consumeWith(result -> {
                     List<Product> products = result.getResponseBody();
                     products.stream().forEach(product -> cleanupProduct(product.getId()));
+                    cleanupStore(storeId);
                 });
     }
 
@@ -72,6 +77,14 @@ class ProductControllerIntegrationTest {
         ProductEntity productEntityToSave = createProduct();
         ProductEntity product = productRepository.save(productEntityToSave);
         return product.getId();
+    }
+
+    private int setupStore() {
+        StoreEntity storeEntityToSave = StoreEntity.builder()
+                .name(MOCK_STORE_NAME)
+                .build();
+        StoreEntity store = storeRepository.save(storeEntityToSave);
+        return store.getId();
     }
 
     private ProductEntity createProduct() {
@@ -96,9 +109,7 @@ class ProductControllerIntegrationTest {
                         .category("New Product Category")
                         .subcategory("New Product Sub Category")
                         .price(100L)
-                        .store(Store.builder()
-                                .id(1)
-                                .build())
+                        .store(MOCK_STORE_NAME)
                         .datePurchased(MOCK_STRING_DATE_2)
                         .build()))
                 .build();
@@ -106,5 +117,8 @@ class ProductControllerIntegrationTest {
 
     private void cleanupProduct(int id) {
         productRepository.deleteById(id);
+    }
+    private void cleanupStore(int id) {
+        storeRepository.deleteById(id);
     }
 }

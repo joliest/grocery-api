@@ -6,7 +6,6 @@ import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
-import com.joliest.portfolios.groceryapi.model.Store;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,8 +58,7 @@ class ProductServiceTest {
                 .category("New Product Category")
                 .subcategory("New Product Sub Category")
                 .price(100L)
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("05-13-2023")
                 .build();
 
@@ -87,7 +85,7 @@ class ProductServiceTest {
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
 
-        when(storeRepository.findByIdOrName(null,"SM Supermarket"))
+        when(storeRepository.findByName("SM Supermarket"))
                 .thenReturn(Optional.of(StoreEntity.builder()
                         .name("SM Supermarket")
                         .build()));
@@ -102,8 +100,7 @@ class ProductServiceTest {
                 .category("New Product Category")
                 .subcategory("New Product Sub Category")
                 .price(100L)
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("05-13-2023")
                 .build();
         assertEquals(expectedProduct, newProduct);
@@ -121,8 +118,7 @@ class ProductServiceTest {
                                 .link("http://link1")
                                 .price(100L)
                                 .subcategory("Sub Category")
-                                .store(Store.builder()
-                                        .name("SM Supermarket").build())
+                                .store("SM Supermarket")
                                 .datePurchased("04-21-2023")
                                 .build(),
                         Product.builder()
@@ -131,14 +127,13 @@ class ProductServiceTest {
                                 .link("http://link2")
                                 .price(150L)
                                 .subcategory("Sub Category")
-                                .store(Store.builder()
-                                        .name("Shopwise").build())
+                                .store("Shopwise")
                                 .datePurchased("05-13-2023")
                                 .build())
                 ).build();
 
         // when
-        when(storeRepository.findByIdOrName(null,"SM Supermarket" ))
+        when(storeRepository.findByName("SM Supermarket" ))
                 .thenReturn(Optional.of(StoreEntity.builder()
                         .name("SM Supermarket")
                         .build()));
@@ -163,7 +158,7 @@ class ProductServiceTest {
                         .name("SM Supermarket").build())
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
                 .build());
-        when(storeRepository.findByIdOrName(null,"Shopwise"))
+        when(storeRepository.findByName("Shopwise"))
                 .thenReturn(Optional.of(StoreEntity.builder()
                         .name("Shopwise")
                         .build()));
@@ -195,8 +190,7 @@ class ProductServiceTest {
                 .link("http://link1")
                 .price(100L)
                 .subcategory("Sub Category")
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("04-21-2023")
                 .build(), Product.builder()
                 .id(2)
@@ -205,8 +199,7 @@ class ProductServiceTest {
                 .link("http://link2")
                 .price(150L)
                 .subcategory("Sub Category")
-                .store(Store.builder()
-                        .name("Shopwise").build())
+                .store("Shopwise")
                 .datePurchased("05-13-2023")
                 .build());
         List<Product> actual = productService.addMultipleProducts(products);
@@ -225,8 +218,7 @@ class ProductServiceTest {
                 .category("New Product Category")
                 .subcategory("New Product Sub Category")
                 .price(100L)
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("05-13-2023")
                 .build();
 
@@ -253,7 +245,7 @@ class ProductServiceTest {
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
 
-        when(storeRepository.findByIdOrName(null,"SM Supermarket"))
+        when(storeRepository.findByName("SM Supermarket"))
                 .thenReturn(Optional.empty());
         when(storeRepository.save(StoreEntity.builder().name("SM Supermarket").build()))
                 .thenReturn(StoreEntity.builder().name("SM Supermarket").build());
@@ -268,8 +260,7 @@ class ProductServiceTest {
                 .category("New Product Category")
                 .subcategory("New Product Sub Category")
                 .price(100L)
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("05-13-2023")
                 .build();
         assertEquals(expectedProduct, newProduct);
@@ -284,8 +275,7 @@ class ProductServiceTest {
                 .link("http://link1")
                 .price(100L)
                 .subcategory("Sub Category")
-                .store(Store.builder()
-                        .name("SM Supermarket").build())
+                .store("SM Supermarket")
                 .datePurchased("04-21-2023")
                 .build();
     }
@@ -298,8 +288,7 @@ class ProductServiceTest {
                 .link("http://link2")
                 .price(150L)
                 .subcategory("Sub Category")
-                .store(Store.builder()
-                        .name("Shopwise").build())
+                .store("Shopwise")
                 .datePurchased("05-13-2023")
                 .build();
     }

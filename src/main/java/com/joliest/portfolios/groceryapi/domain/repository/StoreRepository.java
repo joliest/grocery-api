@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface StoreRepository extends JpaRepository<StoreEntity, Integer> {
-    Optional<StoreEntity> findByIdOrName(Integer id, String name);
+    Optional<StoreEntity> findByName(String name);
 }
