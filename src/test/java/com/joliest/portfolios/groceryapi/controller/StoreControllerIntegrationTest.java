@@ -29,7 +29,7 @@ class StoreControllerIntegrationTest {
 
     @Test
     @Description("Get All Stores")
-    public void getProducts() {
+    public void getStores() {
         List<Integer> storeIds = setupStores();
         webTestClient
                 .get()

@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name="SEQ_STORE", sequenceName = "store_id_seq", allocationSize = 1)
-@Table(name = "store")
-public class StoreEntity {
+@SequenceGenerator(name="SEQ_CATEGORY", sequenceName = "category_id_seq", allocationSize = 1)
+@Table(name = "category")
+public class CategoryEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_STORE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CATEGORY")
     private Integer id;
     private String name;
     private String description;
