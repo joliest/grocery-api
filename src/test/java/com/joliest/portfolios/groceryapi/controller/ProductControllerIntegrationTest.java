@@ -15,7 +15,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static java.util.Arrays.asList;
@@ -54,22 +56,29 @@ class ProductControllerIntegrationTest {
     @Test
     @Description("Post Product")
     public void postProduct() {
-        int storeId = setupStore();
+        // setup
+        setupPostProduct();
+
+        // given
         Products requestBody = createRequestBody();
-        webTestClient
+
+        // when & then
+        WebTestClient.BodyContentSpec response = webTestClient
                 .post()
                 .uri(PRODUCTS_URI)
                 .body(BodyInserters.fromValue(requestBody))
                 .exchange()
                 .expectStatus()
                 .isCreated()
-                .expectBodyList(Product.class)
-                //cleanup
-                .consumeWith(result -> {
-                    List<Product> products = result.getResponseBody();
-                    products.stream().forEach(product -> cleanupProduct(product.getId()));
-                    cleanupStore(storeId);
-                });
+                .expectBody();
+
+        response.jsonPath("$[0].id").isNotEmpty();
+        response.jsonPath("$[0].name").isEqualTo("New product 1");
+        response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
+        response.jsonPath("$[0].price").isEqualTo(100L);
+
+        // cleanup
+        cleanupPostProduct(response);
     }
 
 
@@ -79,12 +88,11 @@ class ProductControllerIntegrationTest {
         return product.getId();
     }
 
-    private int setupStore() {
+    private void setupPostProduct() {
         StoreEntity storeEntityToSave = StoreEntity.builder()
                 .name(MOCK_STORE_NAME)
                 .build();
-        StoreEntity store = storeRepository.save(storeEntityToSave);
-        return store.getId();
+        storeRepository.save(storeEntityToSave);
     }
 
     private ProductEntity createProduct() {
@@ -115,10 +123,20 @@ class ProductControllerIntegrationTest {
                 .build();
     }
 
+    private void cleanupPostProduct(WebTestClient.BodyContentSpec response) {
+        response.jsonPath("$").value((result) -> {
+            List<Map<String, Object>> products = (List<Map<String, Object>>) result;
+            products.forEach(product -> {
+                cleanupProduct((Integer) product.get("id"));
+                cleanupStore((String) product.get("store"));
+            });
+        });
+    }
+
     private void cleanupProduct(int id) {
         productRepository.deleteById(id);
     }
-    private void cleanupStore(int id) {
-        storeRepository.deleteById(id);
+    private void cleanupStore(String name) {
+        storeRepository.removeByName(name);
     }
 }
