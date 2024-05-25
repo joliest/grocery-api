@@ -3,6 +3,8 @@ package com.joliest.portfolios.groceryapi.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.SequenceGenerator;
@@ -28,7 +30,10 @@ public class ProductEntity {
     private Integer id;
     private String name;
     private Long price;
-    private String store;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private StoreEntity store;
     private String category;
     private String subcategory;
     private String link;

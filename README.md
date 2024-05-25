@@ -5,8 +5,8 @@ https://docs.google.com/document/d/1CDljMyTIgbheVOvU7MhRHrwgNqsZur0UUipnYGJ87NA/
 
 # Environment Variables
 ```
-portfolios.grocery-api.username
-portfolios.grocery-api.password
+GROCERY_API_DB_PASSWORD
+GROCERY_API_DB_USERNAME
 ```
 
 # IntelliJ Plugins

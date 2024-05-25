@@ -1,14 +1,17 @@
 package com.joliest.portfolios.groceryapi.service;
 
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
+import com.joliest.portfolios.groceryapi.model.Store;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertDateToDefaultFormat;
@@ -18,6 +21,7 @@ import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocal
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
 
     public List<Product> getProducts() {
         return productRepository.findAll().stream()
@@ -26,7 +30,11 @@ public class ProductService {
                                 .id(productEntity.getId())
                                 .name(productEntity.getName())
                                 .price(productEntity.getPrice())
-                                .store(productEntity.getStore())
+                                .store(Store.builder()
+                                        .id(productEntity.getStore().getId())
+                                        .name(productEntity.getStore().getName())
+                                        .description(productEntity.getStore().getDescription())
+                                        .build())
                                 .category(productEntity.getCategory())
                                 .subcategory(productEntity.getSubcategory())
                                 .link(productEntity.getLink())
@@ -39,6 +47,7 @@ public class ProductService {
         ProductEntity newProduct = convertProductToEntity(product);
 
         ProductEntity productEntity = productRepository.save(newProduct);
+
         return Product.builder()
                 .id(productEntity.getId())
                 .name(productEntity.getName())
@@ -47,7 +56,11 @@ public class ProductService {
                 .subcategory(productEntity.getSubcategory())
                 .link(productEntity.getLink())
                 .datePurchased(convertDateToDefaultFormat(productEntity.getDatePurchased()))
-                .store(productEntity.getStore())
+                .store(Store.builder()
+                        .id(productEntity.getStore().getId())
+                        .name(productEntity.getStore().getName())
+                        .description(productEntity.getStore().getDescription())
+                        .build())
                 .build();
     }
 
@@ -59,6 +72,18 @@ public class ProductService {
     }
 
     private ProductEntity convertProductToEntity(Product product) {
+        Store productStore = product.getStore();
+        Optional<StoreEntity> foundEntity = storeRepository
+                .findByIdOrName(productStore.getId(), productStore.getName());
+        StoreEntity storeEntity;
+        if (foundEntity.isEmpty()) {
+            storeEntity = storeRepository.save(StoreEntity.builder()
+                    .name(productStore.getName())
+                    .description(productStore.getDescription())
+                    .build());
+        } else {
+            storeEntity = foundEntity.get();
+        }
         return ProductEntity.builder()
                 .name(product.getName())
                 .price(product.getPrice())
@@ -66,7 +91,7 @@ public class ProductService {
                 .subcategory(product.getSubcategory())
                 .link(product.getLink())
                 .datePurchased(convertStrToLocalDateTime(product.getDatePurchased()))
-                .store(product.getStore())
+                .store(storeEntity)
                 .build();
     }
 }

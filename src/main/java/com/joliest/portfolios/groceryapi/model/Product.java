@@ -10,7 +10,7 @@ public class Product {
     private String name;
     private Long price;
     // make an object
-    private String store;
+    private Store store;
     private String category;
     private String subcategory;
     private String link;
