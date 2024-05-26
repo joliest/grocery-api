@@ -3,11 +3,14 @@ package com.joliest.portfolios.groceryapi.controller;
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,10 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static java.util.Arrays.asList;
@@ -41,12 +42,18 @@ class ProductControllerIntegrationTest {
     private StoreRepository storeRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private SubcategoryRepository subcategoryRepository;
 
     @Autowired
     private WebTestClient webTestClient;
 
     @Test
-    @Description("Get All Products")
+    @DisplayName("Get All Products")
+    @Description("Scenario: Happy Path" +
+            "Given GET v1/products is the endpoint" +
+            "When GET endpoint is called" +
+            "Then it will send the list of products")
     public void getProducts() {
         // setup
         Integer newId = setupProducts();
@@ -55,18 +62,24 @@ class ProductControllerIntegrationTest {
         WebTestClient.BodyContentSpec response = webTestClient
                 .get()
                 .uri(PRODUCTS_URI)
-                .exchange() // make the call to the endpoint
+                .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
                 .expectBody();
 
-        cleanupProduct(newId);
+        cleanupByProductId(newId);
     }
 
     @Test
-    @Description("Post Product")
+    @DisplayName("Post Products")
+    @Description("Scenario: Happy Path" +
+            "Given POST v1/products is the endpoint" +
+            "When POST endpoint is called with correct request body" +
+            "Then it will send a response of saved products")
     public void postProduct() {
         // setup
+        int categoryId = setupCategory();
+        setupSubcategory(categoryId);
         setupStore();
 
         // given
@@ -85,6 +98,7 @@ class ProductControllerIntegrationTest {
         response.jsonPath("$[0].id").isNotEmpty();
         response.jsonPath("$[0].name").isEqualTo("New product 1");
         response.jsonPath("$[0].category").isEqualTo("New Product Category");
+        response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
         response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
         response.jsonPath("$[0].price").isEqualTo(100L);
 
@@ -98,6 +112,30 @@ class ProductControllerIntegrationTest {
         return productRepository.save(productEntityToSave).getId();
     }
 
+    private ProductEntity createProduct() {
+        int storeId = setupStore();
+        int categoryId = setupCategory();
+        int subcategoryId = setupSubcategory(categoryId);
+
+        CategoryEntity category = CategoryEntity.builder()
+                .id(categoryId)
+                .build();
+        return ProductEntity.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category(category)
+                .subcategory(SubcategoryEntity.builder()
+                        .category(category)
+                        .id(subcategoryId)
+                        .build())
+                .price(100L)
+                .store(StoreEntity.builder()
+                        .id(storeId)
+                        .build())
+                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                .build();
+    }
+
     private int setupStore() {
         StoreEntity storeEntityToSave = StoreEntity.builder()
                 .name(MOCK_STORE_NAME)
@@ -107,28 +145,19 @@ class ProductControllerIntegrationTest {
 
     private int setupCategory() {
         CategoryEntity categoryEntityToSave = CategoryEntity.builder()
-                .name(MOCK_CATEGORY_NAME)
+                .name("New Product Category")
                 .build();
         return categoryRepository.save(categoryEntityToSave).getId();
     }
 
-    private ProductEntity createProduct() {
-        int storeId = setupStore();
-        int categoryId = setupCategory();
-
-        return ProductEntity.builder()
-                .name("New product 1")
-                .link("http://test/new-product-1")
-                .category(CategoryEntity.builder()
-                        .id(categoryId)
-                        .build())
-                .subcategory("New Product Sub Category")
-                .price(100L)
-                .store(StoreEntity.builder()
-                        .id(storeId)
-                        .build())
-                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+    private Integer setupSubcategory(Integer categoryId) {
+        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(categoryEntity)
+                .name("New Product Sub Category")
+                .description("Desc 1")
                 .build();
+        return subcategoryRepository.save(subcategory).getId();
     }
 
     private Products createRequestBody() {
@@ -149,25 +178,16 @@ class ProductControllerIntegrationTest {
         response.jsonPath("$").value((result) -> {
             List<Map<String, Object>> products = (List<Map<String, Object>>) result;
             products.forEach(product -> {
-                cleanupProduct((Integer) product.get("id"));
-                cleanupStore((String) product.get("store"));
-                cleanupCategory((String) product.get("category"));
+                cleanupByProductId((Integer) product.get("id"));
             });
         });
     }
 
-    private void cleanupProduct(int id) {
-        Optional<ProductEntity> testProductToRemove = productRepository.findById(id);
-        int storeId = testProductToRemove.get().getStore().getId();
-        int categoryId = testProductToRemove.get().getCategory().getId();
+    private void cleanupByProductId(int id) {
+        ProductEntity productEntity = productRepository.findById(id).get();
         productRepository.deleteById(id);
-        storeRepository.deleteById(storeId);
-        categoryRepository.deleteById(categoryId);
-    }
-    private void cleanupStore(String name) {
-        storeRepository.removeByName(name);
-    }
-    private void cleanupCategory(String name) {
-        categoryRepository.removeByName(name);
+        storeRepository.deleteById(productEntity.getStore().getId());
+        subcategoryRepository.deleteById(productEntity.getSubcategory().getId());
+        categoryRepository.deleteById(productEntity.getCategory().getId());
     }
 }

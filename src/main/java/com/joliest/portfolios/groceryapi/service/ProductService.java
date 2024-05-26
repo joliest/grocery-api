@@ -3,9 +3,11 @@ package com.joliest.portfolios.groceryapi.service;
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
+    private final SubcategoryRepository subcategoryRepository;
 
     public List<Product> getProducts() {
         return productRepository.findAll().stream()
@@ -34,7 +37,7 @@ public class ProductService {
                                 .price(productEntity.getPrice())
                                 .store(productEntity.getStore().getName())
                                 .category(productEntity.getCategory().getName())
-                                .subcategory(productEntity.getSubcategory())
+                                .subcategory(productEntity.getSubcategory().getName())
                                 .link(productEntity.getLink())
                                 .datePurchased(convertDateToDefaultFormat(productEntity.getDatePurchased()))
                                 .build()
@@ -51,7 +54,7 @@ public class ProductService {
                 .name(productEntity.getName())
                 .price(productEntity.getPrice())
                 .category(productEntity.getCategory().getName())
-                .subcategory(productEntity.getSubcategory())
+                .subcategory(productEntity.getSubcategory().getName())
                 .link(productEntity.getLink())
                 .datePurchased(convertDateToDefaultFormat(productEntity.getDatePurchased()))
                 .store(productEntity.getStore().getName())
@@ -68,16 +71,29 @@ public class ProductService {
     private ProductEntity convertProductToEntity(Product product) {
         StoreEntity storeEntity = getProductStoreEntity(product.getStore());
         CategoryEntity categoryEntity = getProductCategoryEntity(product.getCategory());
+        SubcategoryEntity subcategoryEntity = getProductSubcategoryAndAssignToCategory(product.getSubcategory(), categoryEntity);
         return ProductEntity.builder()
                 .name(product.getName())
                 .price(product.getPrice())
                 .category(categoryEntity)
-                .subcategory(product.getSubcategory())
+                .subcategory(subcategoryEntity)
                 .link(product.getLink())
                 .datePurchased(convertStrToLocalDateTime(product.getDatePurchased()))
                 .store(storeEntity)
                 .store(storeEntity)
                 .build();
+    }
+
+    private SubcategoryEntity getProductSubcategoryAndAssignToCategory(String subcategory, CategoryEntity categoryEntity) {
+        Optional<SubcategoryEntity> foundEntity = categoryEntity.findSubcategory(subcategory);
+        if (foundEntity.isEmpty()) {
+            SubcategoryEntity newSubcategory = SubcategoryEntity.builder()
+                    .category(categoryEntity)
+                    .name(subcategory)
+                    .build();
+            return subcategoryRepository.save(newSubcategory);
+        }
+        return foundEntity.get();
     }
 
     private CategoryEntity getProductCategoryEntity(String category) {

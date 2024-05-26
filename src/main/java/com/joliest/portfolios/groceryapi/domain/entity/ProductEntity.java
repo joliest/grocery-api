@@ -38,7 +38,10 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private CategoryEntity category;
-    private String subcategory;
+
+    @ManyToOne
+    @JoinColumn(name = "subcategory_id")
+    private SubcategoryEntity subcategory;
     private String link;
     private LocalDateTime datePurchased;
 }

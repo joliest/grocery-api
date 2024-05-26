@@ -17,6 +17,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Entity
 @Data
@@ -36,4 +39,13 @@ public class CategoryEntity {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
     private List<SubcategoryEntity> subcategories;
+
+    public Optional<SubcategoryEntity> findSubcategory(String givenSubcategory) {
+        if (isEmpty(this.subcategories)) {
+            return Optional.empty();
+        }
+        return this.subcategories.stream()
+                .filter(subcategory -> givenSubcategory.equals(subcategory.getName()))
+                .findFirst();
+    }
 }

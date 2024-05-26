@@ -3,9 +3,11 @@ package com.joliest.portfolios.groceryapi.service;
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +35,8 @@ class ProductServiceTest {
     private StoreRepository storeRepository;
     @Mock
     private CategoryRepository categoryRepository;
+    @Mock
+    private SubcategoryRepository subcategoryRepository;
     @InjectMocks
     private ProductService productService;
 
@@ -67,40 +71,42 @@ class ProductServiceTest {
                 .build();
 
         // when
+        CategoryEntity category = CategoryEntity.builder()
+                .name("New Product Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("New Product Sub Category")
+                .build();
+        StoreEntity storeEntity = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
         ProductEntity productEntityToSave = ProductEntity.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category(CategoryEntity.builder()
-                        .name("New Product Category")
-                        .build())
-                .subcategory("New Product Sub Category")
+                .category(category)
+                .subcategory(subcategory)
                 .price(100L)
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .store(storeEntity)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
         ProductEntity createdProductEntity = ProductEntity.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category(CategoryEntity.builder()
-                        .name("New Product Category")
-                        .build())
-                .subcategory("New Product Sub Category")
+                .category(category)
+                .subcategory(subcategory)
                 .price(100L)
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .store(storeEntity)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
 
         when(storeRepository.findByName("SM Supermarket"))
-                .thenReturn(Optional.of(StoreEntity.builder()
-                        .name("SM Supermarket")
-                        .build()));
+                .thenReturn(Optional.of(storeEntity));
         when(categoryRepository.findByName("New Product Category"))
-                .thenReturn(Optional.of(CategoryEntity.builder()
-                        .name("New Product Category")
-                        .build()));
+                .thenReturn(Optional.of(category));
+        when(subcategoryRepository.save(any(SubcategoryEntity.class)))
+                .thenReturn(subcategory);
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
         Product newProduct = productService.addProduct(productParam);
 
@@ -136,37 +142,39 @@ class ProductServiceTest {
                 ).build();
 
         // when
+        CategoryEntity category = CategoryEntity.builder()
+                .name("Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("Sub Category")
+                .build();
+        StoreEntity store = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
         when(storeRepository.findByName("SM Supermarket" ))
-                .thenReturn(Optional.of(StoreEntity.builder()
-                        .name("SM Supermarket")
-                        .build()));
+                .thenReturn(Optional.of(store));
         when(categoryRepository.findByName("Category"))
-                .thenReturn(Optional.of(CategoryEntity.builder()
-                        .name("Category")
-                        .build()));
+                .thenReturn(Optional.of(category));
+        when(subcategoryRepository.save(any(SubcategoryEntity.class)))
+                .thenReturn(subcategory);
         when(productRepository.save(ProductEntity.builder()
                 .name("Product Name 1")
-                .category(CategoryEntity.builder()
-                        .name("Category")
-                        .build())
+                .category(category)
                 .link("http://link1")
                 .price(100L)
-                .subcategory("Sub Category")
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .subcategory(subcategory)
+                .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
                 .build()
         )).thenReturn(ProductEntity.builder()
                 .id(1)
                 .name("Product Name 1")
-                .category(CategoryEntity.builder()
-                        .name("Category")
-                        .build())
+                .category(category)
                 .link("http://link1")
                 .price(100L)
-                .subcategory("Sub Category")
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .subcategory(subcategory)
+                .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
                 .build());
         List<Product> expected = Arrays.asList(Product.builder()
@@ -200,41 +208,46 @@ class ProductServiceTest {
                 .build();
 
         // when
+        CategoryEntity category = CategoryEntity.builder()
+                .name("New Product Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("New Product Sub Category")
+                .build();
+        StoreEntity store = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
         ProductEntity productEntityToSave = ProductEntity.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category(CategoryEntity.builder()
-                        .name("New Product Category")
-                        .build())
-                .subcategory("New Product Sub Category")
+                .category(category)
+                .subcategory(subcategory)
                 .price(100L)
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
         ProductEntity createdProductEntity = ProductEntity.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
-                .category(CategoryEntity.builder()
-                        .name("New Product Category")
-                        .build())
-                .subcategory("New Product Sub Category")
+                .category(category)
+                .subcategory(subcategory)
                 .price(100L)
-                .store(StoreEntity.builder()
-                        .name("SM Supermarket").build())
+                .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
 
+        // store
         when(storeRepository.findByName("SM Supermarket"))
                 .thenReturn(Optional.empty());
-        when(storeRepository.save(StoreEntity.builder().name("SM Supermarket").build()))
-                .thenReturn(StoreEntity.builder().name("SM Supermarket").build());
-
+        when(storeRepository.save(store)).thenReturn(store);
+        // category
         when(categoryRepository.findByName("New Product Category"))
                 .thenReturn(Optional.empty());
-        when(categoryRepository.save(CategoryEntity.builder().name("New Product Category").build()))
-                .thenReturn(CategoryEntity.builder().name("New Product Category").build());
+        when(categoryRepository.save(category)).thenReturn(category);
+        // subcategory
+        when(subcategoryRepository.save(subcategory)).thenReturn(subcategory);
 
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
         Product newProduct = productService.addProduct(productParam);
@@ -287,16 +300,21 @@ class ProductServiceTest {
     }
 
     private List<ProductEntity> getMockProductEntities() {
+        CategoryEntity category = CategoryEntity.builder()
+                .name("Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("Sub Category")
+                .build();
         return Arrays.asList(
                 ProductEntity.builder()
                         .id(1)
                         .name("Product Name 1")
-                        .category(CategoryEntity.builder()
-                                .name("Category")
-                                .build())
+                        .category(category)
                         .link("http://link1")
                         .price(100L)
-                        .subcategory("Sub Category")
+                        .subcategory(subcategory)
                         .store(StoreEntity.builder()
                                 .name("SM Supermarket").build())
                         .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
@@ -304,12 +322,10 @@ class ProductServiceTest {
                 ProductEntity.builder()
                         .id(2)
                         .name("Product Name 2")
-                        .category(CategoryEntity.builder()
-                                .name("Category")
-                                .build())
+                        .category(category)
                         .link("http://link2")
                         .price(150L)
-                        .subcategory("Sub Category")
+                        .subcategory(subcategory)
                         .store(StoreEntity.builder()
                                 .name("Shopwise").build())
                         .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))

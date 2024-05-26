@@ -3,11 +3,13 @@ package com.joliest.portfolios.groceryapi.controller;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Store;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Description;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class StoreControllerIntegrationTest {
     static String STORES_URI = "/v1/stores";
@@ -28,7 +31,11 @@ class StoreControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     @Test
-    @Description("Get All Stores")
+    @DisplayName("Get All Stores")
+    @Description("Scenario: Happy Path" +
+            "Given GET v1/stores is the endpoint" +
+            "When GET endpoint is called" +
+            "Then it will send the list of stores")
     public void getStores() {
         List<Integer> storeIds = setupStores();
         webTestClient
@@ -42,7 +49,11 @@ class StoreControllerIntegrationTest {
     }
 
     @Test
-    @Description("Create Stores")
+    @DisplayName("Post Stores")
+    @Description("Scenario: Happy Path" +
+            "Given POST v1/stores is the endpoint" +
+            "When POST endpoint is called with correct request body" +
+            "Then it will send a response of saved stores")
     public void postStores() {
         List<Store> requestBody = createRequestBody();
         webTestClient
