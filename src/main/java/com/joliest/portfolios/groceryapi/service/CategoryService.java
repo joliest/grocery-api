@@ -39,4 +39,8 @@ public class CategoryService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public void deleteCategoryById(Integer categoryId) {
+        categoryRepository.deleteById(categoryId);
+    }
 }

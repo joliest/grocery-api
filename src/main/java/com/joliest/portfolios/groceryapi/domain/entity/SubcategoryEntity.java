@@ -1,14 +1,12 @@
 package com.joliest.portfolios.groceryapi.domain.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -23,17 +21,16 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name="SEQ_CATEGORY", sequenceName = "category_id_seq", allocationSize = 1)
-@Table(name = "category")
-public class CategoryEntity {
+@SequenceGenerator(name="SEQ_SUBCATEGORY", sequenceName = "subcategory_id_seq", allocationSize = 1)
+@Table(name = "subcategory")
+public class SubcategoryEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CATEGORY")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SUBCATEGORY")
     private Integer id;
     private String name;
     private String description;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "category_id")
-    private List<SubcategoryEntity> subcategories;
+    private CategoryEntity category;
 }

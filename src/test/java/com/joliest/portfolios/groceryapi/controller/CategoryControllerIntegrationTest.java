@@ -1,8 +1,11 @@
 package com.joliest.portfolios.groceryapi.controller;
 
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Category;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,9 +15,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -25,10 +30,17 @@ class CategoryControllerIntegrationTest {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private SubcategoryRepository subcategoryRepository;
+
+    @Autowired
     private WebTestClient webTestClient;
 
     @Test
-    @Description("Get All Categories")
+    @DisplayName("Get All Categories")
+    @Description("Scenario: Happy Path" +
+            "Given GET v1/categories is the endpoint" +
+            "When GET endpoint is called" +
+            "Then it will send the list of categories")
     public void getCategories() {
         List<Integer> categoryIds = setupCategories();
         webTestClient
@@ -38,11 +50,15 @@ class CategoryControllerIntegrationTest {
                 .expectStatus()
                 .is2xxSuccessful()
                 .expectBodyList(Category.class);
-        cleanup(categoryIds);
+        cleanupCategory(categoryIds);
     }
 
     @Test
-    @Description("Create Categories")
+    @DisplayName("Create Categories")
+    @Description("Scenario: Happy Path" +
+            "Given POST v1/categories and valid request body is provided" +
+            "When POST Endpoint is called" +
+            "Then it will send the new category as a response")
     public void postCategories() {
         List<Category> requestBody = createRequestBody();
         webTestClient
@@ -59,8 +75,65 @@ class CategoryControllerIntegrationTest {
                             .stream()
                             .map(Category::getId)
                             .collect(Collectors.toList());
-                    cleanup(categoryIds);
+                    cleanupCategory(categoryIds);
                 });
+    }
+
+    @Test
+    @DisplayName("Delete Categories")
+    @Description("Scenario: Happy Path" +
+            "Given DELETE v1/categories/:categoryId" +
+            "When DELETE Endpoint is called" +
+            "Then category id should be deleted")
+    public void deleteCategory() {
+        List<Integer> categoryIds = setupCategories();
+        Integer categoryId = categoryIds.get(0);
+        webTestClient
+                .delete()
+                .uri(CATERGORY_URI + "/" + categoryId)
+                .exchange()
+                .expectStatus()
+                .isOk();
+        Optional<CategoryEntity> deletedCategory = categoryRepository.findById(categoryId);
+        assertThat(deletedCategory.isPresent()).isFalse();
+        cleanupCategory(categoryIds);
+    }
+
+    @Test
+    @DisplayName("Delete Categories: Cascade")
+    @Description("Scenario: Subcategories are available" +
+            "When Category is deleted" +
+            "Then it's Subcategories will also be deleted")
+    public void deleteCategoryCascade() {
+        List<Integer> categoryIds = setupCategories();
+        Integer categoryId = categoryIds.get(0);
+        List<Integer> subcategoryIds = setupSubcategories(categoryId);
+        webTestClient
+                .delete()
+                .uri(CATERGORY_URI + "/" + categoryId)
+                .exchange()
+                .expectStatus()
+                .isOk();
+        Integer subcategoryId = subcategoryIds.get(0);
+        Optional<SubcategoryEntity> deletedSubcategory = subcategoryRepository.findById(subcategoryId);
+        assertThat(deletedSubcategory.isPresent()).isFalse();
+
+        cleanupCategory(categoryIds);
+        cleanupSubcategory(subcategoryIds);
+    }
+
+    private List<Integer> setupSubcategories(Integer categoryId) {
+        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(categoryEntity)
+                .name("Subcategory 1")
+                .description("Desc 1")
+                .build();
+        List<SubcategoryEntity> subcategoriesToSave = asList(subcategory);
+        List<SubcategoryEntity> savedSubcategory = subcategoryRepository.saveAll(subcategoriesToSave);
+        return savedSubcategory.stream()
+                .map(SubcategoryEntity::getId)
+                .collect(Collectors.toList());
     }
 
 
@@ -93,7 +166,11 @@ class CategoryControllerIntegrationTest {
     }
 
 
-    private void cleanup(List<Integer> ids) {
+    private void cleanupCategory(List<Integer> ids) {
         categoryRepository.deleteAllById(ids);
+    }
+
+    private void cleanupSubcategory(List<Integer> ids) {
+        subcategoryRepository.deleteAllById(ids);
     }
 }
