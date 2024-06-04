@@ -24,6 +24,7 @@ import java.util.Optional;
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -105,8 +106,8 @@ class ProductServiceTest {
                 .thenReturn(Optional.of(storeEntity));
         when(categoryRepository.findByName("New Product Category"))
                 .thenReturn(Optional.of(category));
-        when(subcategoryRepository.save(any(SubcategoryEntity.class)))
-                .thenReturn(subcategory);
+        when(subcategoryRepository.findByNameAndCategory(any(String.class), any(CategoryEntity.class)))
+                .thenReturn(Optional.of(subcategory));
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
         Product newProduct = productService.addProduct(productParam);
 
@@ -265,6 +266,146 @@ class ProductServiceTest {
                 .build();
         assertEquals(expectedProduct, newProduct);
         verify(storeRepository).save(any(StoreEntity.class));
+    }
+
+    @Test
+    @DisplayName("when add products and category does not exists, Then it should save the category")
+    void addProductCategoryNoSave() {
+        // given
+        Product productParam = Product.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category("New Product Category")
+                .subcategory("New Product Sub Category")
+                .price(100L)
+                .store("SM Supermarket")
+                .datePurchased("05-13-2023")
+                .build();
+
+        // when
+        CategoryEntity category = CategoryEntity.builder()
+                .name("New Product Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("New Product Sub Category")
+                .build();
+        StoreEntity storeEntity = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
+        ProductEntity productEntityToSave = ProductEntity.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category(category)
+                .subcategory(subcategory)
+                .price(100L)
+                .store(storeEntity)
+                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                .build();
+        ProductEntity createdProductEntity = ProductEntity.builder()
+                .id(1001)
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category(category)
+                .subcategory(subcategory)
+                .price(100L)
+                .store(storeEntity)
+                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                .build();
+
+        when(storeRepository.findByName("SM Supermarket"))
+                .thenReturn(Optional.of(storeEntity));
+        when(categoryRepository.findByName("New Product Category"))
+                .thenReturn(Optional.empty());
+        when(categoryRepository.save(any(CategoryEntity.class)))
+                .thenReturn(category);
+        when(subcategoryRepository.save(any(SubcategoryEntity.class)))
+                .thenReturn(subcategory);
+        when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
+        Product newProduct = productService.addProduct(productParam);
+
+        //then
+        Product expectedProduct = Product.builder()
+                .id(1001)
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category("New Product Category")
+                .subcategory("New Product Sub Category")
+                .price(100L)
+                .store("SM Supermarket")
+                .datePurchased("05-13-2023")
+                .build();
+        assertEquals(expectedProduct, newProduct);
+        verify(categoryRepository).save(any(CategoryEntity.class));
+    }
+
+    @Test
+    @DisplayName("when categories and subcategories do not exists, Then it should save subcategories")
+    void addProductSubcategoryNoSave() {
+        // given
+        Product productParam = Product.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category("New Product Category")
+                .subcategory("New Product Sub Category")
+                .price(100L)
+                .store("SM Supermarket")
+                .datePurchased("05-13-2023")
+                .build();
+
+        // when
+        CategoryEntity category = CategoryEntity.builder()
+                .name("New Product Category")
+                .build();
+        SubcategoryEntity subcategory = SubcategoryEntity.builder()
+                .category(category)
+                .name("New Product Sub Category")
+                .build();
+        StoreEntity storeEntity = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
+        ProductEntity productEntityToSave = ProductEntity.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category(category)
+                .subcategory(subcategory)
+                .price(100L)
+                .store(storeEntity)
+                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                .build();
+        ProductEntity createdProductEntity = ProductEntity.builder()
+                .id(1001)
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category(category)
+                .subcategory(subcategory)
+                .price(100L)
+                .store(storeEntity)
+                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                .build();
+
+        when(storeRepository.findByName("SM Supermarket"))
+                .thenReturn(Optional.of(storeEntity));
+        when(categoryRepository.findByName("New Product Category"))
+                .thenReturn(Optional.of(category));
+        when(subcategoryRepository.save(any(SubcategoryEntity.class)))
+                .thenReturn(subcategory);
+        when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
+        Product newProduct = productService.addProduct(productParam);
+
+        //then
+        Product expectedProduct = Product.builder()
+                .id(1001)
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category("New Product Category")
+                .subcategory("New Product Sub Category")
+                .price(100L)
+                .store("SM Supermarket")
+                .datePurchased("05-13-2023")
+                .build();
+        assertEquals(expectedProduct, newProduct);
+        verify(subcategoryRepository).save(any(SubcategoryEntity.class));
     }
 
     private Product getProduct1() {

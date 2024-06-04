@@ -1,6 +1,7 @@
 package com.joliest.portfolios.groceryapi.service;
 
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Category;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class CategoryServiceTest {
                 .id(1)
                 .name("Category 1")
                 .description("Desc 1")
+                .subcategories(List.of(SubcategoryEntity.builder()
+                        .name("Subcategory 1")
+                        .build()))
                 .build());
         when(categoryRepository.findAll()).thenReturn(categoriesFromDb);
 
@@ -39,6 +43,7 @@ class CategoryServiceTest {
                 .id(1)
                 .name("Category 1")
                 .description("Desc 1")
+                .subcategories(List.of("Subcategory 1"))
                 .build());
         List<Category> actual = categoryService.getCategories();
         assertEquals(expected, actual);

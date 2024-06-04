@@ -1,6 +1,7 @@
 package com.joliest.portfolios.groceryapi.service;
 
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Category;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,9 @@ public class CategoryService {
                         .id(categoryEntity.getId())
                         .name(categoryEntity.getName())
                         .description(categoryEntity.getDescription())
+                        .subcategories(categoryEntity.getSubcategories().stream()
+                                .map(SubcategoryEntity::getName)
+                                .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
     }

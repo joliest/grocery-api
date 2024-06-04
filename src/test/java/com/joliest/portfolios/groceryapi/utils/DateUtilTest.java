@@ -63,4 +63,16 @@ class DateUtilTest {
         assertThat(actual).hasHour(10);
         assertThat(actual).hasMinute(15);
     }
+    @Test
+    @DisplayName("When invalid value is provided in the string, Then it returns now")
+    void convertStrTimestampToDateTest_Invalid() {
+        // given
+        String strDate = "_invalid";
+
+        // when
+        LocalDateTime actual = convertStrToLocalDateTime(strDate);
+
+        // then
+        assertThat(actual).isBeforeOrEqualTo(LocalDateTime.now());
+    }
 }

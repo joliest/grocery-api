@@ -3,6 +3,7 @@ package com.joliest.portfolios.groceryapi.utils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 
 import static io.micrometer.common.util.StringUtils.isEmpty;
@@ -35,6 +36,11 @@ public class DateUtil {
                 .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
                 .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
                 .toFormatter();
-        return LocalDateTime.parse(strDate, dateTimeFormatter);
+        try {
+            return LocalDateTime.parse(strDate, dateTimeFormatter);
+        } catch (DateTimeParseException e) {
+            // TODO:. Allow saving of null dates
+            return LocalDateTime.now();
+        }
     }
 }

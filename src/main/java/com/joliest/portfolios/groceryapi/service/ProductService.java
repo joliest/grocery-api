@@ -85,7 +85,7 @@ public class ProductService {
     }
 
     private SubcategoryEntity getProductSubcategoryAndAssignToCategory(String subcategory, CategoryEntity categoryEntity) {
-        Optional<SubcategoryEntity> foundEntity = categoryEntity.findSubcategory(subcategory);
+        Optional<SubcategoryEntity> foundEntity = subcategoryRepository.findByNameAndCategory(subcategory, categoryEntity);
         if (foundEntity.isEmpty()) {
             SubcategoryEntity newSubcategory = SubcategoryEntity.builder()
                     .category(categoryEntity)
