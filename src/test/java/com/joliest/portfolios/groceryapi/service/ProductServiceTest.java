@@ -2,14 +2,17 @@ package com.joliest.portfolios.groceryapi.service;
 
 import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.PurchaseHistoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.PurchaseHistoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
+import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,14 +20,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +41,8 @@ class ProductServiceTest {
     private CategoryRepository categoryRepository;
     @Mock
     private SubcategoryRepository subcategoryRepository;
+    @Mock
+    private PurchaseHistoryRepository purchaseHistoryRepository;
     @InjectMocks
     private ProductService productService;
 
@@ -123,6 +128,7 @@ class ProductServiceTest {
                 .datePurchased("05-13-2023")
                 .build();
         assertEquals(expectedProduct, newProduct);
+        verify(purchaseHistoryRepository).save(any(PurchaseHistoryEntity.class));
     }
 
     @Test
@@ -130,7 +136,7 @@ class ProductServiceTest {
     void addMultipleProducts() {
         // given
         Products products = Products.builder()
-                .products(Arrays.asList(
+                .products(asList(
                         Product.builder()
                                 .name("Product Name 1")
                                 .category("Category")
@@ -178,7 +184,7 @@ class ProductServiceTest {
                 .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
                 .build());
-        List<Product> expected = Arrays.asList(Product.builder()
+        List<Product> expected = asList(Product.builder()
                 .id(1)
                 .name("Product Name 1")
                 .category("Category")
@@ -192,6 +198,7 @@ class ProductServiceTest {
 
         // then
         assertEquals(expected, actual);
+        verify(purchaseHistoryRepository).save(any(PurchaseHistoryEntity.class));
     }
 
     @Test
@@ -418,6 +425,13 @@ class ProductServiceTest {
                 .subcategory("Sub Category")
                 .store("SM Supermarket")
                 .datePurchased("04-21-2023")
+                .purchaseHistoryList(singletonList(PurchaseHistory.builder()
+                        .id(1)
+                        .store("SM Supermarket")
+                        .datePurchased(MOCK_STRING_DATE_1)
+                        .link("http://link1")
+                        .price(100L)
+                        .build()))
                 .build();
     }
 
@@ -431,13 +445,20 @@ class ProductServiceTest {
                 .subcategory("Sub Category")
                 .store("Shopwise")
                 .datePurchased("05-13-2023")
+                .purchaseHistoryList(singletonList(PurchaseHistory.builder()
+                        .id(2)
+                        .store("Shopwise")
+                        .datePurchased(MOCK_STRING_DATE_2)
+                        .link("http://link2")
+                        .price(150L)
+                        .build()))
                 .build();
     }
 
     private List<Product> getMockListOfProducts() {
         Product product1 = getProduct1();
         Product product2 = getProduct2();
-        return Arrays.asList(product1, product2);
+        return asList(product1, product2);
     }
 
     private List<ProductEntity> getMockProductEntities() {
@@ -448,7 +469,13 @@ class ProductServiceTest {
                 .category(category)
                 .name("Sub Category")
                 .build();
-        return Arrays.asList(
+        StoreEntity store1 = StoreEntity.builder()
+                .name("SM Supermarket")
+                .build();
+        StoreEntity store2 = StoreEntity.builder()
+                .name("Shopwise")
+                .build();
+        return asList(
                 ProductEntity.builder()
                         .id(1)
                         .name("Product Name 1")
@@ -456,9 +483,16 @@ class ProductServiceTest {
                         .link("http://link1")
                         .price(100L)
                         .subcategory(subcategory)
-                        .store(StoreEntity.builder()
-                                .name("SM Supermarket").build())
+                        .store(store1)
                         .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
+                        .histories(singletonList(PurchaseHistoryEntity.builder()
+                                .product(ProductEntity.builder().build())
+                                .id(1)
+                                .store(store1)
+                                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
+                                .link("http://link1")
+                                .price(100L)
+                                .build()))
                         .build(),
                 ProductEntity.builder()
                         .id(2)
@@ -467,9 +501,16 @@ class ProductServiceTest {
                         .link("http://link2")
                         .price(150L)
                         .subcategory(subcategory)
-                        .store(StoreEntity.builder()
-                                .name("Shopwise").build())
+                        .store(store2)
                         .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                        .histories(asList(PurchaseHistoryEntity.builder()
+                                .product(ProductEntity.builder().build())
+                                .id(2)
+                                .store(store2)
+                                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
+                                .link("http://link2")
+                                .price(150L)
+                                .build()))
                         .build());
     }
 }

@@ -3,6 +3,8 @@ package com.joliest.portfolios.groceryapi.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class Product {
@@ -15,4 +17,5 @@ public class Product {
     private String subcategory;
     private String link;
     private String datePurchased;
+    private List<PurchaseHistory> purchaseHistoryList;
 }

@@ -6,10 +6,12 @@ import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.PurchaseHistoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.Products;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import java.util.List;
-import java.util.Map;
-
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static java.util.Arrays.asList;
 
@@ -32,7 +31,6 @@ import static java.util.Arrays.asList;
 class ProductControllerIntegrationTest {
     private static final String MOCK_STRING_DATE_2 = "05-13-2023";
     private static final String MOCK_STORE_NAME = "sample store";
-    private static final String MOCK_CATEGORY_NAME = "sample category";
 
     static String PRODUCTS_URI = "/v1/products";
 
@@ -44,9 +42,20 @@ class ProductControllerIntegrationTest {
     private CategoryRepository categoryRepository;
     @Autowired
     private SubcategoryRepository subcategoryRepository;
+    @Autowired
+    private PurchaseHistoryRepository purchaseHistoryRepository;
 
     @Autowired
     private WebTestClient webTestClient;
+
+    @BeforeEach
+    void startFresh() {
+        purchaseHistoryRepository.deleteAll();
+        productRepository.deleteAll();
+        subcategoryRepository.deleteAll();
+        categoryRepository.deleteAll();
+        storeRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Get All Products")
@@ -67,7 +76,13 @@ class ProductControllerIntegrationTest {
                 .is2xxSuccessful()
                 .expectBody();
 
-        cleanupByProductId(newId);
+        response.jsonPath("$[0].id").isNotEmpty();
+        response.jsonPath("$[0].name").isEqualTo("New product 1");
+        response.jsonPath("$[0].category").isEqualTo("New Product Category");
+        response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
+        response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
+        response.jsonPath("$[0].price").isEqualTo(100L);
+        response.jsonPath("$[0].purchaseHistoryList").isArray();
     }
 
     @Test
@@ -101,9 +116,6 @@ class ProductControllerIntegrationTest {
         response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
         response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
         response.jsonPath("$[0].price").isEqualTo(100L);
-
-        // cleanup
-        cleanupPostProduct(response);
     }
 
 
@@ -172,22 +184,5 @@ class ProductControllerIntegrationTest {
                         .datePurchased(MOCK_STRING_DATE_2)
                         .build()))
                 .build();
-    }
-
-    private void cleanupPostProduct(WebTestClient.BodyContentSpec response) {
-        response.jsonPath("$").value((result) -> {
-            List<Map<String, Object>> products = (List<Map<String, Object>>) result;
-            products.forEach(product -> {
-                cleanupByProductId((Integer) product.get("id"));
-            });
-        });
-    }
-
-    private void cleanupByProductId(int id) {
-        ProductEntity productEntity = productRepository.findById(id).get();
-        productRepository.deleteById(id);
-        storeRepository.deleteById(productEntity.getStore().getId());
-        subcategoryRepository.deleteById(productEntity.getSubcategory().getId());
-        categoryRepository.deleteById(productEntity.getCategory().getId());
     }
 }
