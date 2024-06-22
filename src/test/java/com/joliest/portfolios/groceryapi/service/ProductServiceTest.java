@@ -12,7 +12,6 @@ import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
-import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,7 +64,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("when add products, Then it should return the added product")
-    void addProduct() {
+    void importProduct() {
         // given
         ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
@@ -115,7 +114,7 @@ class ProductServiceTest {
         when(subcategoryRepository.findByNameAndCategory(any(String.class), any(CategoryEntity.class)))
                 .thenReturn(Optional.of(subcategory));
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.addProduct(productParam);
+        Product newProduct = productService.importProduct(productParam);
 
         //then
         Product expectedProduct = Product.builder()
@@ -134,7 +133,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("when adding of multiple products, Then it should add the multiple products")
-    void addMultipleProducts() {
+    void importMultipleProducts() {
         // given
         List<ProductImport> products = asList(
                 ProductImport.builder()
@@ -193,7 +192,7 @@ class ProductServiceTest {
                 .store("SM Supermarket")
                 .datePurchased("04-21-2023")
                 .build());
-        List<Product> actual = productService.addMultipleProducts(products);
+        List<Product> actual = productService.importMultipleProducts(products);
 
         // then
         assertEquals(expected, actual);
@@ -202,7 +201,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("when given store is empty, Then it should save the new store")
-    void addProductStoreIsEmpty() {
+    void importProductStoreIsEmpty() {
         // given
         ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
@@ -257,7 +256,7 @@ class ProductServiceTest {
         when(subcategoryRepository.save(subcategory)).thenReturn(subcategory);
 
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.addProduct(productParam);
+        Product newProduct = productService.importProduct(productParam);
 
         //then
         Product expectedProduct = Product.builder()
@@ -276,7 +275,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("when add products and category does not exists, Then it should save the category")
-    void addProductCategoryNoSave() {
+    void importProductCategoryNoSave() {
         // given
         ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
@@ -328,7 +327,7 @@ class ProductServiceTest {
         when(subcategoryRepository.save(any(SubcategoryEntity.class)))
                 .thenReturn(subcategory);
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.addProduct(productParam);
+        Product newProduct = productService.importProduct(productParam);
 
         //then
         Product expectedProduct = Product.builder()
@@ -347,7 +346,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("when categories and subcategories do not exists, Then it should save subcategories")
-    void addProductSubcategoryNoSave() {
+    void importProductSubcategoryNoSave() {
         // given
         ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
@@ -397,7 +396,7 @@ class ProductServiceTest {
         when(subcategoryRepository.save(any(SubcategoryEntity.class)))
                 .thenReturn(subcategory);
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.addProduct(productParam);
+        Product newProduct = productService.importProduct(productParam);
 
         //then
         Product expectedProduct = Product.builder()

@@ -3,7 +3,6 @@ package com.joliest.portfolios.groceryapi.controller;
 
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
-import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.service.ProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,8 +29,7 @@ public class ProductController {
 
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
-//    TODO:. change method name
-    public List<Product> addMultipleProducts(@RequestBody List<ProductImport> productImportList) {
-        return productService.addMultipleProducts(productImportList);
+    public List<Product> importMultipleProducts(@RequestBody List<ProductImport> productImportList) {
+        return productService.importMultipleProducts(productImportList);
     }
 }

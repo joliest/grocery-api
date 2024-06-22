@@ -12,7 +12,6 @@ import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
-import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -62,8 +61,8 @@ public class ProductService {
                 }).collect(Collectors.toList());
     }
 
-    public Product addProduct(ProductImport productImport) {
-        ProductEntity productEntity = convertProductToEntity(productImport);
+    public Product importProduct(ProductImport productImport) {
+        ProductEntity productEntity = convertProductImportToProduct(productImport);
         PurchaseHistoryEntity productHistoryEntity = PurchaseHistoryEntity.builder()
                 .product(productEntity)
                 .store(productEntity.getStore())
@@ -86,13 +85,13 @@ public class ProductService {
     }
 
     @Transactional
-    public List<Product> addMultipleProducts(List<ProductImport> productList) {
+    public List<Product> importMultipleProducts(List<ProductImport> productList) {
         return productList.stream()
-                .map(this::addProduct)
+                .map(this::importProduct)
                 .collect(Collectors.toList());
     }
 
-    private ProductEntity convertProductToEntity(ProductImport productImport) {
+    private ProductEntity convertProductImportToProduct(ProductImport productImport) {
         Optional<ProductEntity> foundProduct = findProduct(productImport);
         StoreEntity storeEntity = getProductStoreEntity(productImport.getStore());
 
