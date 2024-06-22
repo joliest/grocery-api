@@ -11,6 +11,7 @@ import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
+import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
 import lombok.RequiredArgsConstructor;
@@ -61,14 +62,14 @@ public class ProductService {
                 }).collect(Collectors.toList());
     }
 
-    public Product addProduct(Product product) {
-        ProductEntity productEntity = convertProductToEntity(product);
+    public Product addProduct(ProductImport productImport) {
+        ProductEntity productEntity = convertProductToEntity(productImport);
         PurchaseHistoryEntity productHistoryEntity = PurchaseHistoryEntity.builder()
                 .product(productEntity)
                 .store(productEntity.getStore())
-                .price(product.getPrice())
-                .datePurchased(convertStrToLocalDateTime(product.getDatePurchased()))
-                .link(product.getLink())
+                .price(productImport.getPrice())
+                .datePurchased(convertStrToLocalDateTime(productImport.getDatePurchased()))
+                .link(productImport.getLink())
                 .build();
         purchaseHistoryRepository.save(productHistoryEntity);
 
@@ -85,27 +86,26 @@ public class ProductService {
     }
 
     @Transactional
-    public List<Product> addMultipleProducts(Products products) {
-        List<Product> productList = products.getProducts();
+    public List<Product> addMultipleProducts(List<ProductImport> productList) {
         return productList.stream()
                 .map(this::addProduct)
                 .collect(Collectors.toList());
     }
 
-    private ProductEntity convertProductToEntity(Product product) {
-        Optional<ProductEntity> foundProduct = findProduct(product);
-        StoreEntity storeEntity = getProductStoreEntity(product.getStore());
+    private ProductEntity convertProductToEntity(ProductImport productImport) {
+        Optional<ProductEntity> foundProduct = findProduct(productImport);
+        StoreEntity storeEntity = getProductStoreEntity(productImport.getStore());
 
         if (foundProduct.isEmpty()) {
-            CategoryEntity categoryEntity = getProductCategoryEntity(product.getCategory());
-            SubcategoryEntity subcategoryEntity = getProductSubcategoryAndAssignToCategory(product.getSubcategory(), categoryEntity);
+            CategoryEntity categoryEntity = getProductCategoryEntity(productImport.getCategory());
+            SubcategoryEntity subcategoryEntity = getProductSubcategoryAndAssignToCategory(productImport.getSubcategory(), categoryEntity);
             ProductEntity newProduct =  ProductEntity.builder()
-                    .name(product.getName())
-                    .price(product.getPrice())
+                    .name(productImport.getName())
+                    .price(productImport.getPrice())
                     .category(categoryEntity)
                     .subcategory(subcategoryEntity)
-                    .link(product.getLink())
-                    .datePurchased(convertStrToLocalDateTime(product.getDatePurchased()))
+                    .link(productImport.getLink())
+                    .datePurchased(convertStrToLocalDateTime(productImport.getDatePurchased()))
                     .store(storeEntity)
                     .build();
             return productRepository.save(newProduct);
@@ -113,11 +113,11 @@ public class ProductService {
         return foundProduct.get();
     }
 
-    private Optional<ProductEntity> findProduct(Product product) {
+    private Optional<ProductEntity> findProduct(ProductImport productImport) {
         return productRepository.findFirstByNameAndCategoryNameAndSubcategoryName(
-                product.getName(),
-                product.getCategory(),
-                product.getSubcategory());
+                productImport.getName(),
+                productImport.getCategory(),
+                productImport.getSubcategory());
     }
 
     private StoreEntity getProductStoreEntity(String productStore) {

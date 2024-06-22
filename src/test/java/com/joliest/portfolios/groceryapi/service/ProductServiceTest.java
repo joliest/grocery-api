@@ -11,6 +11,7 @@ import com.joliest.portfolios.groceryapi.domain.repository.PurchaseHistoryReposi
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
+import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
 import org.junit.jupiter.api.DisplayName;
@@ -66,7 +67,7 @@ class ProductServiceTest {
     @DisplayName("when add products, Then it should return the added product")
     void addProduct() {
         // given
-        Product productParam = Product.builder()
+        ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
                 .category("New Product Category")
@@ -135,18 +136,16 @@ class ProductServiceTest {
     @DisplayName("when adding of multiple products, Then it should add the multiple products")
     void addMultipleProducts() {
         // given
-        Products products = Products.builder()
-                .products(asList(
-                        Product.builder()
-                                .name("Product Name 1")
-                                .category("Category")
-                                .link("http://link1")
-                                .price(100L)
-                                .subcategory("Sub Category")
-                                .store("SM Supermarket")
-                                .datePurchased("04-21-2023")
-                                .build())
-                ).build();
+        List<ProductImport> products = asList(
+                ProductImport.builder()
+                        .name("Product Name 1")
+                        .category("Category")
+                        .link("http://link1")
+                        .price(100L)
+                        .subcategory("Sub Category")
+                        .store("SM Supermarket")
+                        .datePurchased("04-21-2023")
+                        .build());
 
         // when
         CategoryEntity category = CategoryEntity.builder()
@@ -205,7 +204,7 @@ class ProductServiceTest {
     @DisplayName("when given store is empty, Then it should save the new store")
     void addProductStoreIsEmpty() {
         // given
-        Product productParam = Product.builder()
+        ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
                 .category("New Product Category")
@@ -279,7 +278,7 @@ class ProductServiceTest {
     @DisplayName("when add products and category does not exists, Then it should save the category")
     void addProductCategoryNoSave() {
         // given
-        Product productParam = Product.builder()
+        ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
                 .category("New Product Category")
@@ -350,7 +349,7 @@ class ProductServiceTest {
     @DisplayName("when categories and subcategories do not exists, Then it should save subcategories")
     void addProductSubcategoryNoSave() {
         // given
-        Product productParam = Product.builder()
+        ProductImport productParam = ProductImport.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
                 .category("New Product Category")

@@ -2,6 +2,7 @@ package com.joliest.portfolios.groceryapi.controller;
 
 
 import com.joliest.portfolios.groceryapi.model.Product;
+import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.model.Products;
 import com.joliest.portfolios.groceryapi.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -27,9 +28,10 @@ public class ProductController {
         return productService.getProducts();
     }
 
-    @PostMapping
+    @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Product> addMultipleProducts(@RequestBody Products products) {
-        return productService.addMultipleProducts(products);
+//    TODO:. change method name
+    public List<Product> addMultipleProducts(@RequestBody List<ProductImport> productImportList) {
+        return productService.addMultipleProducts(productImportList);
     }
 }

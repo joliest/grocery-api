@@ -10,6 +10,7 @@ import com.joliest.portfolios.groceryapi.domain.repository.PurchaseHistoryReposi
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
+import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.model.Products;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.util.List;
+
 import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static java.util.Arrays.asList;
 
@@ -33,6 +36,7 @@ class ProductControllerIntegrationTest {
     private static final String MOCK_STORE_NAME = "sample store";
 
     static String PRODUCTS_URI = "/v1/products";
+    static String PRODUCT_IMPORT_URI = "/v1/products/import";
 
     @Autowired
     private ProductRepository productRepository;
@@ -88,22 +92,22 @@ class ProductControllerIntegrationTest {
     @Test
     @DisplayName("Post Products")
     @Description("Scenario: Happy Path" +
-            "Given POST v1/products is the endpoint" +
+            "Given POST v1/products/import is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved products")
-    public void postProduct() {
+    public void importProducts() {
         // setup
         int categoryId = setupCategory();
         setupSubcategory(categoryId);
         setupStore();
 
         // given
-        Products requestBody = createRequestBody();
+        List<ProductImport> requestBody = createRequestBody();
 
         // when & then
         WebTestClient.BodyContentSpec response = webTestClient
                 .post()
-                .uri(PRODUCTS_URI)
+                .uri(PRODUCT_IMPORT_URI)
                 .body(BodyInserters.fromValue(requestBody))
                 .exchange()
                 .expectStatus()
@@ -172,17 +176,15 @@ class ProductControllerIntegrationTest {
         return subcategoryRepository.save(subcategory).getId();
     }
 
-    private Products createRequestBody() {
-        return Products.builder()
-                .products(asList(Product.builder()
-                        .name("New product 1")
-                        .link("http://test/new-product-1")
-                        .category("New Product Category")
-                        .subcategory("New Product Sub Category")
-                        .price(100L)
-                        .store(MOCK_STORE_NAME)
-                        .datePurchased(MOCK_STRING_DATE_2)
-                        .build()))
-                .build();
+    private List<ProductImport> createRequestBody() {
+        return asList(ProductImport.builder()
+                .name("New product 1")
+                .link("http://test/new-product-1")
+                .category("New Product Category")
+                .subcategory("New Product Sub Category")
+                .price(100L)
+                .store(MOCK_STORE_NAME)
+                .datePurchased(MOCK_STRING_DATE_2)
+                .build());
     }
 }
