@@ -114,10 +114,10 @@ class ProductServiceTest {
         when(subcategoryRepository.findByNameAndCategory(any(String.class), any(CategoryEntity.class)))
                 .thenReturn(Optional.of(subcategory));
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.importProduct(productParam);
+        ProductImport newProduct = productService.importProduct(productParam);
 
         //then
-        Product expectedProduct = Product.builder()
+        ProductImport expectedProduct = ProductImport.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
@@ -182,7 +182,7 @@ class ProductServiceTest {
                 .store(store)
                 .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_1))
                 .build());
-        List<Product> expected = asList(Product.builder()
+        List<ProductImport> expected = asList(ProductImport.builder()
                 .id(1)
                 .name("Product Name 1")
                 .category("Category")
@@ -192,7 +192,7 @@ class ProductServiceTest {
                 .store("SM Supermarket")
                 .datePurchased("04-21-2023")
                 .build());
-        List<Product> actual = productService.importMultipleProducts(products);
+        List<ProductImport> actual = productService.importMultipleProducts(products);
 
         // then
         assertEquals(expected, actual);
@@ -256,10 +256,10 @@ class ProductServiceTest {
         when(subcategoryRepository.save(subcategory)).thenReturn(subcategory);
 
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.importProduct(productParam);
+        ProductImport newProduct = productService.importProduct(productParam);
 
         //then
-        Product expectedProduct = Product.builder()
+        ProductImport expectedProduct = ProductImport.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
@@ -327,10 +327,10 @@ class ProductServiceTest {
         when(subcategoryRepository.save(any(SubcategoryEntity.class)))
                 .thenReturn(subcategory);
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.importProduct(productParam);
+        ProductImport newProduct = productService.importProduct(productParam);
 
         //then
-        Product expectedProduct = Product.builder()
+        ProductImport expectedProduct = ProductImport.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")
@@ -396,10 +396,10 @@ class ProductServiceTest {
         when(subcategoryRepository.save(any(SubcategoryEntity.class)))
                 .thenReturn(subcategory);
         when(productRepository.save(productEntityToSave)).thenReturn(createdProductEntity);
-        Product newProduct = productService.importProduct(productParam);
+        ProductImport newProduct = productService.importProduct(productParam);
 
         //then
-        Product expectedProduct = Product.builder()
+        ProductImport expectedProduct = ProductImport.builder()
                 .id(1001)
                 .name("New product 1")
                 .link("http://test/new-product-1")

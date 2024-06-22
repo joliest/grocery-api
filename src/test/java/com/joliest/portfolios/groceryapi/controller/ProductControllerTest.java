@@ -42,9 +42,9 @@ class ProductControllerTest {
         List<ProductImport> products = getMockProductImports();
 
         // when
-        List<Product> expected = getMockProducts();
+        List<ProductImport> expected = getMockProductImports();
         when(productService.importMultipleProducts(products)).thenReturn(expected);
-        List<Product> actual = productController.importMultipleProducts(products);
+        List<ProductImport> actual = productController.importMultipleProducts(products);
 
         // then
         assertEquals(expected, actual);

@@ -61,7 +61,7 @@ public class ProductService {
                 }).collect(Collectors.toList());
     }
 
-    public Product importProduct(ProductImport productImport) {
+    public ProductImport importProduct(ProductImport productImport) {
         ProductEntity productEntity = convertProductImportToProduct(productImport);
         PurchaseHistoryEntity productHistoryEntity = PurchaseHistoryEntity.builder()
                 .product(productEntity)
@@ -72,7 +72,7 @@ public class ProductService {
                 .build();
         purchaseHistoryRepository.save(productHistoryEntity);
 
-        return Product.builder()
+        return ProductImport.builder()
                 .id(productEntity.getId())
                 .name(productEntity.getName())
                 .category(productEntity.getCategory().getName())
@@ -85,7 +85,7 @@ public class ProductService {
     }
 
     @Transactional
-    public List<Product> importMultipleProducts(List<ProductImport> productList) {
+    public List<ProductImport> importMultipleProducts(List<ProductImport> productList) {
         return productList.stream()
                 .map(this::importProduct)
                 .collect(Collectors.toList());

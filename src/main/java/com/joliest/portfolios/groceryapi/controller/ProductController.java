@@ -29,7 +29,7 @@ public class ProductController {
 
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<Product> importMultipleProducts(@RequestBody List<ProductImport> productImportList) {
+    public List<ProductImport> importMultipleProducts(@RequestBody List<ProductImport> productImportList) {
         return productService.importMultipleProducts(productImportList);
     }
 }
