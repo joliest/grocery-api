@@ -39,9 +39,9 @@ public class ProductService {
                     List<PurchaseHistory> purchaseHistoryList = productEntity.getHistories()
                             .stream()
                             .map(purchaseHistoryEntity -> PurchaseHistory.builder()
-                                    .store(productEntity.getStore().getName())
                                     .id(purchaseHistoryEntity.getId())
                                     .link(purchaseHistoryEntity.getLink())
+                                    .store(purchaseHistoryEntity.getStore().getName())
                                     .price(purchaseHistoryEntity.getPrice())
                                     .datePurchased(convertDateToDefaultFormat(purchaseHistoryEntity.getDatePurchased()))
                                     .build())
@@ -50,12 +50,8 @@ public class ProductService {
                     return Product.builder()
                             .id(productEntity.getId())
                             .name(productEntity.getName())
-                            .price(productEntity.getPrice())
-                            .store(productEntity.getStore().getName())
                             .category(productEntity.getCategory().getName())
                             .subcategory(productEntity.getSubcategory().getName())
-                            .link(productEntity.getLink())
-                            .datePurchased(convertDateToDefaultFormat(productEntity.getDatePurchased()))
                             .purchaseHistoryList(purchaseHistoryList)
                             .build();
                 }).collect(Collectors.toList());
@@ -63,9 +59,10 @@ public class ProductService {
 
     public ProductImport importProduct(ProductImport productImport) {
         ProductEntity productEntity = convertProductImportToProduct(productImport);
+        StoreEntity storeEntity = getProductStoreEntity(productImport.getStore());
         PurchaseHistoryEntity productHistoryEntity = PurchaseHistoryEntity.builder()
                 .product(productEntity)
-                .store(productEntity.getStore())
+                .store(storeEntity)
                 .price(productImport.getPrice())
                 .datePurchased(convertStrToLocalDateTime(productImport.getDatePurchased()))
                 .link(productImport.getLink())
@@ -93,19 +90,14 @@ public class ProductService {
 
     private ProductEntity convertProductImportToProduct(ProductImport productImport) {
         Optional<ProductEntity> foundProduct = findProduct(productImport);
-        StoreEntity storeEntity = getProductStoreEntity(productImport.getStore());
 
         if (foundProduct.isEmpty()) {
             CategoryEntity categoryEntity = getProductCategoryEntity(productImport.getCategory());
             SubcategoryEntity subcategoryEntity = getProductSubcategoryAndAssignToCategory(productImport.getSubcategory(), categoryEntity);
             ProductEntity newProduct =  ProductEntity.builder()
                     .name(productImport.getName())
-                    .price(productImport.getPrice())
                     .category(categoryEntity)
                     .subcategory(subcategoryEntity)
-                    .link(productImport.getLink())
-                    .datePurchased(convertStrToLocalDateTime(productImport.getDatePurchased()))
-                    .store(storeEntity)
                     .build();
             return productRepository.save(newProduct);
         }

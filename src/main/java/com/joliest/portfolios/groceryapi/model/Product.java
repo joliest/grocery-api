@@ -10,12 +10,7 @@ import java.util.List;
 public class Product {
     private Integer id;
     private String name;
-    private Long price;
-    // make an object
-    private String store;
     private String category;
     private String subcategory;
-    private String link;
-    private String datePurchased;
     private List<PurchaseHistory> purchaseHistoryList;
 }

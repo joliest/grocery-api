@@ -23,7 +23,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import java.util.List;
 
-import static com.joliest.portfolios.groceryapi.utils.DateUtil.convertStrToLocalDateTime;
 import static java.util.Arrays.asList;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -82,8 +81,6 @@ class ProductControllerIntegrationTest {
         response.jsonPath("$[0].name").isEqualTo("New product 1");
         response.jsonPath("$[0].category").isEqualTo("New Product Category");
         response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
-        response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
-        response.jsonPath("$[0].price").isEqualTo(100L);
         response.jsonPath("$[0].purchaseHistoryList").isArray();
     }
 
@@ -127,7 +124,7 @@ class ProductControllerIntegrationTest {
     }
 
     private ProductEntity createProduct() {
-        int storeId = setupStore();
+        setupStore();
         int categoryId = setupCategory();
         int subcategoryId = setupSubcategory(categoryId);
 
@@ -136,17 +133,11 @@ class ProductControllerIntegrationTest {
                 .build();
         return ProductEntity.builder()
                 .name("New product 1")
-                .link("http://test/new-product-1")
                 .category(category)
                 .subcategory(SubcategoryEntity.builder()
                         .category(category)
                         .id(subcategoryId)
                         .build())
-                .price(100L)
-                .store(StoreEntity.builder()
-                        .id(storeId)
-                        .build())
-                .datePurchased(convertStrToLocalDateTime(MOCK_STRING_DATE_2))
                 .build();
     }
 

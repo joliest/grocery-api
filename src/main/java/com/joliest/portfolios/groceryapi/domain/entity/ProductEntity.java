@@ -35,11 +35,6 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PRODUCT")
     private Integer id;
     private String name;
-    private Long price;
-
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    private StoreEntity store;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -48,8 +43,6 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "subcategory_id")
     private SubcategoryEntity subcategory;
-    private String link;
-    private LocalDateTime datePurchased;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OrderBy(clause = "datePurchased DESC")
