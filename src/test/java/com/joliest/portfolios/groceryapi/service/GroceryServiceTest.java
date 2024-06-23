@@ -12,6 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +30,7 @@ class GroceryServiceTest {
     @Test
     @DisplayName("When add grocery is called," +
             "Then it saves and return the new grocery")
-    void addProducts() {
+    void addGrocery() {
         // given
         Grocery requestBody = Grocery.builder()
                 .name(NAME_SAMPLE)
@@ -55,5 +58,27 @@ class GroceryServiceTest {
                 .description(DESCRIPTION_SAMPLE)
                 .build();
         assertEquals(expectedGrocery, actual);
+    }
+    @Test
+    @DisplayName("When get groceries is called," +
+            "Then it returns list of saved groceries")
+    void getGroceries() {
+        // when
+        List<GroceryEntity> fetchedGroceries = asList(GroceryEntity.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build());
+        when(groceryRepository.findAll())
+                .thenReturn(fetchedGroceries);
+        List<Grocery> actual = groceryService.getGroceries();
+
+        // then
+        List<Grocery>  expectedGroceries = asList(Grocery.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build());
+        assertEquals(expectedGroceries, actual);
     }
 }

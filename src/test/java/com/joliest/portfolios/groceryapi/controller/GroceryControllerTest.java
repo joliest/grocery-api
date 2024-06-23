@@ -9,11 +9,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Description;
 
+import java.util.List;
+
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GroceryControllerTest {
+    static Integer ID_SAMPLE = 1;
+    static String NAME_SAMPLE = "New Grocery";
+    static String DESCRIPTION_SAMPLE = "Description";
     @Mock
     private GroceryService groceryService;
     @InjectMocks
@@ -25,15 +31,15 @@ class GroceryControllerTest {
     public void addGrocery() {
         // given
         Grocery requestBody = Grocery.builder()
-                .name("Grocery 1")
-                .description("Grocery description")
+                .name(NAME_SAMPLE)
+                .description(DESCRIPTION_SAMPLE)
                 .build();
 
         // when
         Grocery newGrocery = Grocery.builder()
                 .id(1)
-                .name("Grocery 1")
-                .description("Grocery description")
+                .name(NAME_SAMPLE)
+                .description(DESCRIPTION_SAMPLE)
                 .build();
         when(groceryService.addGrocery(requestBody))
                 .thenReturn(newGrocery);
@@ -42,9 +48,32 @@ class GroceryControllerTest {
         // then
         Grocery expectedGrocery = Grocery.builder()
                 .id(1)
-                .name("Grocery 1")
-                .description("Grocery description")
+                .name(NAME_SAMPLE)
+                .description(DESCRIPTION_SAMPLE)
                 .build();
         assertEquals(expectedGrocery, actual);
+    }
+
+    @Test
+    @Description("When get groceries is called" +
+            "Then it should return the the list of saved groceries")
+    public void getGroceries() {
+        // when
+        List<Grocery> fetchedGroceries = asList(Grocery.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build());
+        when(groceryService.getGroceries())
+                .thenReturn(fetchedGroceries);
+        List<Grocery> actual = groceryService.getGroceries();
+
+        // then
+        List<Grocery>  expectedGroceries = asList(Grocery.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build());
+        assertEquals(expectedGroceries, actual);
     }
 }

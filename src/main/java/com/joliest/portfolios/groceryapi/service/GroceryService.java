@@ -6,6 +6,8 @@ import com.joliest.portfolios.groceryapi.model.Grocery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class GroceryService {
@@ -21,5 +23,16 @@ public class GroceryService {
                 .description(savedGrocery.getDescription())
                 .name(savedGrocery.getName())
                 .build();
+    }
+
+    public List<Grocery> getGroceries() {
+        List<GroceryEntity> fetchedGroceries = groceryRepository.findAll();
+        return fetchedGroceries.stream()
+                .map(groceryEntity -> Grocery.builder()
+                        .id(groceryEntity.getId())
+                        .name(groceryEntity.getName())
+                        .description(groceryEntity.getDescription())
+                        .build())
+                .toList();
     }
 }

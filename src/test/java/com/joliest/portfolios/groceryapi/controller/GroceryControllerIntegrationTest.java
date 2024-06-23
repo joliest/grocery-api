@@ -39,19 +39,12 @@ class GroceryControllerIntegrationTest {
             "Given POST v1/groceries is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved grocery")
-    public void importProducts() {
+    public void addGrocery() {
         // given
-        Grocery requestBody = Grocery.builder()
-                .name(NAME_SAMPLE)
-                .description(DESCRIPTION_SAMPLE)
-                .build();
+        Grocery requestBody = createGroceryRequestBody();
 
         // when & then
-        WebTestClient.BodyContentSpec response = webTestClient
-                .post()
-                .uri(GROCERY_URI)
-                .body(BodyInserters.fromValue(requestBody))
-                .exchange()
+        WebTestClient.BodyContentSpec response = createGrocery(requestBody)
                 .expectStatus()
                 .isCreated()
                 .expectBody();
@@ -59,5 +52,44 @@ class GroceryControllerIntegrationTest {
         response.jsonPath("$.id").isNotEmpty();
         response.jsonPath("$.name").isEqualTo(NAME_SAMPLE);
         response.jsonPath("$.description").isEqualTo(DESCRIPTION_SAMPLE);
+    }
+
+    @Test
+    @DisplayName("Post Products")
+    @Description("Scenario: Happy Path" +
+            "Given GET v1/groceries is the endpoint" +
+            "When the endpoint is called" +
+            "Then it will send a response of saved grocery list")
+    public void getGroceries() {
+        // setup
+        createGrocery(createGroceryRequestBody());
+
+        // when & then
+        WebTestClient.BodyContentSpec response = webTestClient
+                .get()
+                .uri(GROCERY_URI)
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody();
+
+        response.jsonPath("$[0].id").isNotEmpty();
+        response.jsonPath("$[0].name").isEqualTo(NAME_SAMPLE);
+        response.jsonPath("$[0].description").isEqualTo(DESCRIPTION_SAMPLE);
+    }
+
+    private Grocery createGroceryRequestBody() {
+        return  Grocery.builder()
+                .name(NAME_SAMPLE)
+                .description(DESCRIPTION_SAMPLE)
+                .build();
+    }
+
+    private WebTestClient.ResponseSpec createGrocery(Grocery requestBody) {
+        return webTestClient
+                .post()
+                .uri(GROCERY_URI)
+                .body(BodyInserters.fromValue(requestBody))
+                .exchange();
     }
 }

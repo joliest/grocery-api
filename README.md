@@ -16,3 +16,8 @@ GROCERY_API_DB_USERNAME
 
 - application-test.properties
   - spring.datasource.url should have it's own data source dedicated only for testing.
+
+# Critical Reminders
+
+- application-test.properties
+  - spring.datasource.url should have it's own data source dedicated only for testing.
