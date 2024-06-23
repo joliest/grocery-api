@@ -11,3 +11,8 @@ GROCERY_API_DB_USERNAME
 
 # IntelliJ Plugins
 - Lombok
+
+# Critical Reminders
+
+- application-test.properties
+  - spring.datasource.url should have it's own data source dedicated only for testing.
