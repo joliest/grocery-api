@@ -373,7 +373,7 @@ class ProductServiceTest {
         verify(subcategoryRepository).save(any(SubcategoryEntity.class));
     }
 
-    private Product getProduct1() {
+    public static Product getProduct1() {
         return Product.builder()
                 .id(1)
                 .name("Product Name 1")

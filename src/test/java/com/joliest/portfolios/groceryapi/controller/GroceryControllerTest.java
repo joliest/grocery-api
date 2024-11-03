@@ -1,6 +1,7 @@
 package com.joliest.portfolios.groceryapi.controller;
 
 import com.joliest.portfolios.groceryapi.model.Grocery;
+import com.joliest.portfolios.groceryapi.model.GroceryRequestModel;
 import com.joliest.portfolios.groceryapi.service.GroceryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Description;
 
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -30,7 +31,7 @@ class GroceryControllerTest {
             "Then it should return the new grocery")
     public void addGrocery() {
         // given
-        Grocery requestBody = Grocery.builder()
+        GroceryRequestModel requestBody = GroceryRequestModel.builder()
                 .name(NAME_SAMPLE)
                 .description(DESCRIPTION_SAMPLE)
                 .build();
@@ -59,7 +60,7 @@ class GroceryControllerTest {
             "Then it should return the the list of saved groceries")
     public void getGroceries() {
         // when
-        List<Grocery> fetchedGroceries = asList(Grocery.builder()
+        List<Grocery> fetchedGroceries = Collections.singletonList(Grocery.builder()
                 .id(ID_SAMPLE)
                 .name(NAME_SAMPLE)
                 .name(DESCRIPTION_SAMPLE)
@@ -69,7 +70,7 @@ class GroceryControllerTest {
         List<Grocery> actual = groceryService.getGroceries();
 
         // then
-        List<Grocery>  expectedGroceries = asList(Grocery.builder()
+        List<Grocery>  expectedGroceries = Collections.singletonList(Grocery.builder()
                 .id(ID_SAMPLE)
                 .name(NAME_SAMPLE)
                 .name(DESCRIPTION_SAMPLE)

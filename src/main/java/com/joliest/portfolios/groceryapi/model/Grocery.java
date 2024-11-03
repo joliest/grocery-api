@@ -16,5 +16,6 @@ public class Grocery {
     private Integer id;
     private String name;
     private String description;
+    private Store store;
     private List<GroceryItem> list = new ArrayList<>();
 }

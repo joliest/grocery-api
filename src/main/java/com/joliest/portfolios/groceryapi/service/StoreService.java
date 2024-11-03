@@ -3,6 +3,7 @@ package com.joliest.portfolios.groceryapi.service;
 import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Store;
+import com.joliest.portfolios.groceryapi.utils.StoreUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,7 @@ public class StoreService {
     public List<Store> getStores() {
         List<StoreEntity> storeEntities = storeRepository.findAll();
         return storeEntities.stream()
-                .map(storeEntity -> Store.builder()
-                        .id(storeEntity.getId())
-                        .name(storeEntity.getName())
-                        .description(storeEntity.getDescription())
-                        .build())
+                .map(StoreUtil::convertEntityToStore)
                 .collect(Collectors.toList());
     }
 

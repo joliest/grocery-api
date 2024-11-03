@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroceryItem {
+public class GroceryRequestModel {
     private Integer id;
-    private Float quantity;
-    private String notes;
-    private Long actualPrice;
-    private Long estimatedPrice;
-
-    private Product product;
+    private String name;
+    private String description;
+    private Integer storeId;
 }

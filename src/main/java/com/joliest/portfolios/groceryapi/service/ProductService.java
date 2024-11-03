@@ -12,7 +12,7 @@ import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
-import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
+import com.joliest.portfolios.groceryapi.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,26 +35,8 @@ public class ProductService {
 
     public List<Product> getProducts() {
         return productRepository.findAll().stream()
-                .map(productEntity -> {
-                    List<PurchaseHistory> purchaseHistoryList = productEntity.getHistories()
-                            .stream()
-                            .map(purchaseHistoryEntity -> PurchaseHistory.builder()
-                                    .id(purchaseHistoryEntity.getId())
-                                    .link(purchaseHistoryEntity.getLink())
-                                    .store(purchaseHistoryEntity.getStore().getName())
-                                    .price(purchaseHistoryEntity.getPrice())
-                                    .datePurchased(convertDateToDefaultFormat(purchaseHistoryEntity.getDatePurchased()))
-                                    .build())
-                            .toList();
-
-                    return Product.builder()
-                            .id(productEntity.getId())
-                            .name(productEntity.getName())
-                            .category(productEntity.getCategory().getName())
-                            .subcategory(productEntity.getSubcategory().getName())
-                            .purchaseHistoryList(purchaseHistoryList)
-                            .build();
-                }).collect(Collectors.toList());
+                .map(ProductUtil::convertEntityToProduct)
+                .collect(Collectors.toList());
     }
 
     public ProductImport importProduct(ProductImport productImport) {

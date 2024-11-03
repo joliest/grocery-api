@@ -2,6 +2,9 @@ package com.joliest.portfolios.groceryapi.controller;
 
 
 import com.joliest.portfolios.groceryapi.model.Grocery;
+import com.joliest.portfolios.groceryapi.model.GroceryRequestModel;
+import com.joliest.portfolios.groceryapi.model.GroceryItem;
+import com.joliest.portfolios.groceryapi.model.GroceryItemRequestModel;
 import com.joliest.portfolios.groceryapi.service.GroceryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +27,7 @@ public class GroceryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Grocery addGrocery(@RequestBody Grocery grocery) {
+    public Grocery addGrocery(@RequestBody GroceryRequestModel grocery) {
         return groceryService.addGrocery(grocery);
     }
 
@@ -33,12 +36,11 @@ public class GroceryController {
         return groceryService.getGroceries();
     }
 
-    @PostMapping("/{groceryId}/item/{productId}")
+    @PostMapping("/{groceryId}/item")
     @ResponseStatus(HttpStatus.CREATED)
-    public Grocery addGroceryItem(@RequestBody Grocery grocery,
-                                  @PathVariable Integer groceryId,
-                                  @PathVariable Integer productId
+    public GroceryItem addGroceryItem(@PathVariable Integer groceryId,
+                                      @RequestBody GroceryItemRequestModel requestBody
     ) {
-        return groceryService.addGrocery(grocery);
+        return groceryService.addGroceryItem(groceryId, requestBody);
     }
 }

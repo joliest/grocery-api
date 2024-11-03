@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 public class StoreEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_STORE")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_STORE")
     private Integer id;
     private String name;
     private String description;
