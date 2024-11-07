@@ -1,109 +1,71 @@
 package com.joliest.portfolios.groceryapi.controller;
 
-import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
-import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.model.Store;
+import com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Description;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class StoreControllerIntegrationTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class StoreControllerIntegrationTest extends BaseIntegrationTest {
     static String STORES_URI = "/v1/stores";
 
     @Autowired
-    private StoreRepository storeRepository;
+    private TestRestTemplate restTemplate;
 
     @Autowired
-    private WebTestClient webTestClient;
-
-    @Test
-    @DisplayName("Get All Stores")
-    @Description("Scenario: Happy Path" +
-            "Given GET v1/stores is the endpoint" +
-            "When GET endpoint is called" +
-            "Then it will send the list of stores")
-    public void getStores() {
-        List<Integer> storeIds = setupStores();
-        webTestClient
-                .get()
-                .uri(STORES_URI)
-                .exchange()
-                .expectStatus()
-                .is2xxSuccessful()
-                .expectBodyList(Store.class);
-        cleanup(storeIds);
-    }
+    private StoreTestHelper storeTestHelper;
 
     @Test
     @DisplayName("Post Stores")
+    @Order(1)
     @Description("Scenario: Happy Path" +
             "Given POST v1/stores is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved stores")
     public void postStores() {
-        List<Store> requestBody = createRequestBody();
-        webTestClient
-                .post()
-                .uri(STORES_URI)
-                .body(BodyInserters.fromValue(requestBody))
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectBodyList(Store.class)
-                //cleanup
-                .consumeWith(result -> {
-                    List<Integer> storeIds = result.getResponseBody()
-                            .stream()
-                            .map(Store::getId)
-                            .collect(Collectors.toList());
-                    cleanup(storeIds);
-                });
+        List<Store> requestBody = storeTestHelper.createRequestBody();
+
+        ResponseEntity<List<Store>> response = restTemplate.exchange(STORES_URI, HttpMethod.POST, new HttpEntity<>(requestBody), new ParameterizedTypeReference<>() {});
+        List<Store> stores = response.getBody();
+
+        assertThat(stores.get(0).getName()).isNotNull();
+        assertThat(stores.get(0).getDescription()).isNotNull();
+
+        assertThat(stores.get(1).getName()).isNotNull();
+        assertThat(stores.get(1).getDescription()).isNotNull();
+
     }
 
+    @Test
+    @DisplayName("Get All Stores")
+    @Order(2)
+    @Description("Scenario: Happy Path" +
+            "Given GET v1/stores is the endpoint" +
+            "When GET endpoint is called" +
+            "Then it will send the list of stores")
+    public void getStores() {
+        ParameterizedTypeReference<List<Store>> responseType = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<Store>> response = restTemplate.exchange(STORES_URI, HttpMethod.GET, null, responseType);
+        List<Store> stores = response.getBody();
 
-    private List<Integer> setupStores() {
-        StoreEntity store1 = StoreEntity.builder()
-                .name("Store 1")
-                .description("Desc 1")
-                .build();
-        StoreEntity store2 = StoreEntity.builder()
-                .name("Store 2")
-                .description("Desc 2")
-                .build();
-        List<StoreEntity> storesToSave = asList(store1, store2);
-        List<StoreEntity> savedStore = storeRepository.saveAll(storesToSave);
-        return savedStore.stream()
-                .map(StoreEntity::getId)
-                .collect(Collectors.toList());
-    }
+        assertThat(stores.get(0).getName()).isNotNull();
+        assertThat(stores.get(0).getDescription()).isNotNull();
 
-    private List<Store> createRequestBody() {
-        Store store1 = Store.builder()
-                .name("Store 1")
-                .description("Desc 1")
-                .build();
-        Store store2 = Store.builder()
-                .name("Store 2")
-                .description("Desc 2")
-                .build();
-        return asList(store1, store2);
-    }
-
-    private void cleanup(List<Integer> ids) {
-        storeRepository.deleteAllById(ids);
+        assertThat(stores.get(1).getName()).isNotNull();
+        assertThat(stores.get(1).getDescription()).isNotNull();
     }
 }
