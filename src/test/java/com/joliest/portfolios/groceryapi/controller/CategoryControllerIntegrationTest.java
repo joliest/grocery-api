@@ -1,10 +1,10 @@
 package com.joliest.portfolios.groceryapi.controller;
 
-import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
-import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Category;
+import com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper;
+import com.joliest.portfolios.groceryapi.testHelper.SubcategoryTestHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -18,25 +18,24 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     static String CATERGORY_URI = "/v1/categories";
 
     @Autowired
-    private CategoryRepository categoryRepository;
+    private SubcategoryRepository subcategoryRepository;
 
     @Autowired
-    private SubcategoryRepository subcategoryRepository;
+    private CategoryTestHelper categoryTestHelper;
+
+    @Autowired
+    private SubcategoryTestHelper subcategoryTestHelper;
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -49,7 +48,7 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
             "When POST Endpoint is called, " +
             "Then it will send the new category as a response")
     public void postCategories() {
-        List<Category> requestBody = createRequestBody();
+        List<Category> requestBody = categoryTestHelper.createRequestBody();
         ResponseEntity<List<Category>> response = restTemplate.exchange(CATERGORY_URI, HttpMethod.POST, new HttpEntity<>(requestBody), new ParameterizedTypeReference<>() {});
         List<Category> stores = response.getBody();
 
@@ -101,8 +100,10 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
             "Then it's Subcategories will also be deleted")
     public void deleteCategoryCascade() {
         // given
-        Integer categoryId = setupCategories().get(0);
-        Integer subcategoryId = setupSubcategories(categoryId).get(0);
+        Integer categoryId = categoryTestHelper.setupCategories().get(0);
+        Integer subcategoryId = subcategoryTestHelper
+                .setupSubcategoryWithCategoryId(categoryId)
+                .getId();
 
         // when
         ResponseEntity<Void> response = restTemplate.exchange(CATERGORY_URI + "/" + categoryId, HttpMethod.DELETE, HttpEntity.EMPTY, Void.class);
@@ -111,48 +112,5 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
         Optional<SubcategoryEntity> deletedSubcategory = subcategoryRepository.findById(subcategoryId);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(deletedSubcategory.isPresent()).isFalse();
-    }
-
-    private List<Integer> setupSubcategories(Integer categoryId) {
-        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
-        SubcategoryEntity subcategory = SubcategoryEntity.builder()
-                .category(categoryEntity)
-                .name("Subcategory 1")
-                .description("Desc 1")
-                .build();
-        List<SubcategoryEntity> subcategoriesToSave = asList(subcategory);
-        List<SubcategoryEntity> savedSubcategory = subcategoryRepository.saveAll(subcategoriesToSave);
-        return savedSubcategory.stream()
-                .map(SubcategoryEntity::getId)
-                .collect(Collectors.toList());
-    }
-
-
-    private List<Integer> setupCategories() {
-        CategoryEntity category1 = CategoryEntity.builder()
-                .name("Category 1111")
-                .description("Desc 111")
-                .build();
-        CategoryEntity category2 = CategoryEntity.builder()
-                .name("Category 2222")
-                .description("Desc 2222")
-                .build();
-        List<CategoryEntity> categoriesToSave = asList(category1, category2);
-        List<CategoryEntity> savedCategory = categoryRepository.saveAll(categoriesToSave);
-        return savedCategory.stream()
-                .map(CategoryEntity::getId)
-                .collect(Collectors.toList());
-    }
-
-    private List<Category> createRequestBody() {
-        Category category1 = Category.builder()
-                .name("Category 1")
-                .description("Desc 1")
-                .build();
-        Category category2 = Category.builder()
-                .name("Category 2")
-                .description("Desc 2")
-                .build();
-        return asList(category1, category2);
     }
 }

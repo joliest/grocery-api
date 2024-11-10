@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.util.Collections;
 import java.util.List;
 
+import static com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper.CATEGORY_TEST_ID_1;
 import static com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper.MOCK_STORE_NAME;
 import static java.util.Arrays.asList;
 
@@ -27,10 +29,15 @@ public class ProductTestHelper {
     public static String PRODUCT_IMPORT_URI = "/v1/products/import";
     public static final String MOCK_STRING_DATE_2 = "05-13-2023";
 
+    // newly setup data are always set to 1
+    public static final Integer SUB_CATEGORY_TEST_ID = 1;
+
     @Autowired
     private ProductRepository productRepository;
     @Autowired
     private StoreTestHelper storeTestHelper;
+    @Autowired
+    private CategoryTestHelper categoryTestHelper;
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
@@ -41,54 +48,50 @@ public class ProductTestHelper {
     private GroceryItemRepository groceryItemRepository;
     @Autowired
     private WebTestClient webTestClient;
-    public ProductEntity setupProducts() {
+    public void setupProducts() {
         ProductEntity productEntityToSave = createProduct();
-        return productRepository.save(productEntityToSave);
+        productRepository.save(productEntityToSave);
     }
 
     public ProductEntity createProduct() {
         storeTestHelper.setupStore();
-        int categoryId = setupCategory();
-        int subcategoryId = setupSubcategory(categoryId);
+        categoryTestHelper.setupCategories();
+        setupSubcategory();
 
         CategoryEntity category = CategoryEntity.builder()
-                .id(categoryId)
+                .id(CATEGORY_TEST_ID_1)
                 .build();
         return ProductEntity.builder()
                 .name("New product 1")
                 .category(category)
                 .subcategory(SubcategoryEntity.builder()
                         .category(category)
-                        .id(subcategoryId)
+                        .id(SUB_CATEGORY_TEST_ID)
                         .build())
                 .build();
     }
 
-    public int setupCategory() {
-        CategoryEntity categoryEntityToSave = CategoryEntity.builder()
-                .name("New Product Category")
-                .build();
-        return categoryRepository.save(categoryEntityToSave).getId();
-    }
-
-    public Integer setupSubcategory(Integer categoryId) {
-        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
+    public void setupSubcategory() {
         SubcategoryEntity subcategory = SubcategoryEntity.builder()
-                .category(categoryEntity)
+                .category(CategoryEntity.builder()
+                        .id(CATEGORY_TEST_ID_1)
+                        .build())
                 .name("New Product Sub Category")
-                .description("Desc 1")
+                .description("Subcategory Description")
                 .build();
-        return subcategoryRepository.save(subcategory).getId();
+
+        // ID is automatically set to 1
+        subcategoryRepository.save(subcategory);
     }
 
     public List<ProductImport> createRequestBody() {
-        return asList(ProductImport.builder()
+        return Collections.singletonList(ProductImport.builder()
                 .name("New product 1")
                 .link("http://test/new-product-1")
                 .category("New Product Category")
                 .subcategory("New Product Sub Category")
                 .price(100L)
-                .store(MOCK_STORE_NAME)
+                .store("New store name")
                 .datePurchased(MOCK_STRING_DATE_2)
                 .build());
     }
@@ -110,8 +113,8 @@ public class ProductTestHelper {
      * (!) Unfortunately, the store response from import is a string name :(
      */
     public WebTestClient.ResponseSpec performProductImport() {
-        int categoryId = this.setupCategory();
-        this.setupSubcategory(categoryId);
+        categoryTestHelper.setupCategories();
+        this.setupSubcategory();
         storeTestHelper.setupStore();
 
         // given

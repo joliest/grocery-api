@@ -1,64 +1,39 @@
 package com.joliest.portfolios.groceryapi.controller;
 
-import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
-import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
-import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
-import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
-import com.joliest.portfolios.groceryapi.domain.repository.CategoryRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.PurchaseHistoryRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
-import org.junit.jupiter.api.BeforeEach;
+import com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Description;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper.MOCK_CATEGORY_NAME_1;
+import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCTS_URI;
+import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCT_IMPORT_URI;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ProductControllerIntegrationTest {
-    private static final String MOCK_STRING_DATE_2 = "05-13-2023";
-    private static final String MOCK_STORE_NAME = "sample store";
 
-    static String PRODUCTS_URI = "/v1/products";
-    static String PRODUCT_IMPORT_URI = "/v1/products/import";
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class ProductControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private StoreRepository storeRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private SubcategoryRepository subcategoryRepository;
-    @Autowired
-    private PurchaseHistoryRepository purchaseHistoryRepository;
+    private ProductTestHelper productTestHelper;
 
     @Autowired
-    private WebTestClient webTestClient;
-
-    @BeforeEach
-    void startFresh() {
-        purchaseHistoryRepository.deleteAll();
-        productRepository.deleteAll();
-        subcategoryRepository.deleteAll();
-        categoryRepository.deleteAll();
-        storeRepository.deleteAll();
-    }
+    private TestRestTemplate restTemplate;
 
     @Test
+    @Order(1)
     @DisplayName("Get All Products")
     @Description("Scenario: Happy Path" +
             "Given GET v1/products is the endpoint" +
@@ -66,114 +41,45 @@ class ProductControllerIntegrationTest {
             "Then it will send the list of products")
     public void getProducts() {
         // setup
-        Integer newId = setupProducts();
+        productTestHelper.setupProducts();
 
         // when
-        WebTestClient.BodyContentSpec response = webTestClient
-                .get()
-                .uri(PRODUCTS_URI)
-                .exchange()
-                .expectStatus()
-                .is2xxSuccessful()
-                .expectBody();
+        ParameterizedTypeReference<List<ProductImport>> responseType = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<ProductImport>> response = restTemplate.exchange(PRODUCTS_URI, HttpMethod.GET, null, responseType);
 
-        response.jsonPath("$[0].id").isNotEmpty();
-        response.jsonPath("$[0].name").isEqualTo("New product 1");
-        response.jsonPath("$[0].category").isEqualTo("New Product Category");
-        response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
-        response.jsonPath("$[0].purchaseHistoryList").isArray();
+        // then
+        List<ProductImport> productImportList = response.getBody();
+        assertThat(productImportList).isNotNull();
+        assertThat(productImportList.get(0).getId()).isNotNull();
+        assertThat(productImportList.get(0).getName()).isEqualTo("New product 1");
+        assertThat(productImportList.get(0).getCategory()).isEqualTo(MOCK_CATEGORY_NAME_1);
+        assertThat(productImportList.get(0).getSubcategory()).isEqualTo("New Product Sub Category");
+        assertThat(productImportList.get(0).getPurchaseHistoryList()).isInstanceOf(List.class);
     }
 
     @Test
+    @Order(2)
     @DisplayName("Post Products")
     @Description("Scenario: Happy Path" +
             "Given POST v1/products/import is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved products")
     public void importProducts() {
-        // setup
-        int categoryId = setupCategory();
-        setupSubcategory(categoryId);
-        setupStore();
-
         // given
-        List<ProductImport> requestBody = createRequestBody();
+        List<ProductImport> requestBody = productTestHelper.createRequestBody();
 
-        // when & then
-        WebTestClient.BodyContentSpec response = webTestClient
-                .post()
-                .uri(PRODUCT_IMPORT_URI)
-                .body(BodyInserters.fromValue(requestBody))
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectBody();
+        // when
+        ResponseEntity<List<ProductImport>> response = restTemplate.exchange(PRODUCT_IMPORT_URI, HttpMethod.POST, new HttpEntity<>(requestBody), new ParameterizedTypeReference<>() {});
 
-        response.jsonPath("$[0].id").isNotEmpty();
-        response.jsonPath("$[0].name").isEqualTo("New product 1");
-        response.jsonPath("$[0].category").isEqualTo("New Product Category");
-        response.jsonPath("$[0].subcategory").isEqualTo("New Product Sub Category");
-        response.jsonPath("$[0].store").isEqualTo(MOCK_STORE_NAME);
-        response.jsonPath("$[0].price").isEqualTo(100L);
-    }
+        // then
+        List<ProductImport> importedProduct = response.getBody();
 
-
-    private Integer setupProducts() {
-        ProductEntity productEntityToSave = createProduct();
-        return productRepository.save(productEntityToSave).getId();
-    }
-
-    private ProductEntity createProduct() {
-        setupStore();
-        int categoryId = setupCategory();
-        int subcategoryId = setupSubcategory(categoryId);
-
-        CategoryEntity category = CategoryEntity.builder()
-                .id(categoryId)
-                .build();
-        return ProductEntity.builder()
-                .name("New product 1")
-                .category(category)
-                .subcategory(SubcategoryEntity.builder()
-                        .category(category)
-                        .id(subcategoryId)
-                        .build())
-                .build();
-    }
-
-    private int setupStore() {
-        StoreEntity storeEntityToSave = StoreEntity.builder()
-                .name(MOCK_STORE_NAME)
-                .build();
-        return storeRepository.save(storeEntityToSave).getId();
-    }
-
-    private int setupCategory() {
-        CategoryEntity categoryEntityToSave = CategoryEntity.builder()
-                .name("New Product Category")
-                .build();
-        return categoryRepository.save(categoryEntityToSave).getId();
-    }
-
-    private Integer setupSubcategory(Integer categoryId) {
-        CategoryEntity categoryEntity = categoryRepository.findById(categoryId).get();
-        SubcategoryEntity subcategory = SubcategoryEntity.builder()
-                .category(categoryEntity)
-                .name("New Product Sub Category")
-                .description("Desc 1")
-                .build();
-        return subcategoryRepository.save(subcategory).getId();
-    }
-
-    private List<ProductImport> createRequestBody() {
-        return asList(ProductImport.builder()
-                .name("New product 1")
-                .link("http://test/new-product-1")
-                .category("New Product Category")
-                .subcategory("New Product Sub Category")
-                .price(100L)
-                .store(MOCK_STORE_NAME)
-                .datePurchased(MOCK_STRING_DATE_2)
-                .build());
+        assertThat(importedProduct).isNotNull();
+        assertThat(importedProduct.get(0).getId()).isNotNull();
+        assertThat(importedProduct.get(0).getName()).isEqualTo("New product 1");
+        assertThat(importedProduct.get(0).getCategory()).isEqualTo("New Product Category");
+        assertThat(importedProduct.get(0).getSubcategory()).isEqualTo("New Product Sub Category");
+        assertThat(importedProduct.get(0).getStore()).isEqualTo("New store name");
+        assertThat(importedProduct.get(0).getPrice()).isEqualTo(100L);
     }
 }
