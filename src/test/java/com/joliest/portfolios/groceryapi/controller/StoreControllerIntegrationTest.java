@@ -30,8 +30,8 @@ class StoreControllerIntegrationTest extends BaseIntegrationTest {
     private StoreTestHelper storeTestHelper;
 
     @Test
-    @DisplayName("Post Stores")
     @Order(1)
+    @DisplayName("Post Stores")
     @Description("Scenario: Happy Path" +
             "Given POST v1/stores is the endpoint" +
             "When POST endpoint is called with correct request body" +
@@ -51,8 +51,8 @@ class StoreControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("Get All Stores")
     @Order(2)
+    @DisplayName("Get All Stores")
     @Description("Scenario: Happy Path" +
             "Given GET v1/stores is the endpoint" +
             "When GET endpoint is called" +
