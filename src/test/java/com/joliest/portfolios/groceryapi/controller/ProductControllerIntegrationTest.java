@@ -25,14 +25,13 @@ import java.util.List;
 import static com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper.MOCK_CATEGORY_NAME_1;
 import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCTS_URI;
 import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCT_IMPORT_URI;
+import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProductControllerIntegrationTest {
-    private static final String INIT_SCRIPT = "integration-testing/initScript.sql";
-
     @Autowired
     private ProductTestHelper productTestHelper;
 
@@ -41,8 +40,7 @@ class ProductControllerIntegrationTest {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.0")
-            .withInitScript(INIT_SCRIPT);
+    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
 
     @Test
     @Order(1)

@@ -22,13 +22,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
+import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StoreControllerIntegrationTest {
-    private static final String INIT_SCRIPT = "integration-testing/initScript.sql";
 
     static String STORES_URI = "/v1/stores";
 
@@ -40,8 +40,7 @@ class StoreControllerIntegrationTest {
 
     @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.0")
-            .withInitScript(INIT_SCRIPT);
+    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
 
     @Test
     @Order(1)
