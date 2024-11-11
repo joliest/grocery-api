@@ -12,6 +12,8 @@ import static java.util.Arrays.asList;
 
 @Service
 public class StoreTestHelper {
+    // newly created store always = 1
+    public static final Integer MOCK_STORE_ID = 1;
     public static final String MOCK_STORE_NAME = "sample store";
     public static final String MOCK_STORE_DESC = "sample desc";
     @Autowired

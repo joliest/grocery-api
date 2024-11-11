@@ -1,95 +1,148 @@
 package com.joliest.portfolios.groceryapi.controller;
 
-import com.joliest.portfolios.groceryapi.domain.repository.GroceryRepository;
+import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.model.Grocery;
-import org.junit.jupiter.api.BeforeEach;
+import com.joliest.portfolios.groceryapi.model.GroceryRequestModel;
+import com.joliest.portfolios.groceryapi.model.GroceryItem;
+import com.joliest.portfolios.groceryapi.model.GroceryItemRequestModel;
+import com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper;
+import com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Description;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class GroceryControllerIntegrationTest {
+import java.util.List;
 
+import static com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper.MOCK_STORE_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class GroceryControllerIntegrationTest extends BaseIntegrationTest {
+
+    static Integer GROCERY_ID = 1; // newly created grocery in this file will be 1
     static String GROCERY_URI = "/v1/groceries";
+    static String GROCERY_ITEM_URI = "/v1/groceries/%s/item";
     static String NAME_SAMPLE = "New Grocery";
     static String DESCRIPTION_SAMPLE = "Description";
 
     @Autowired
-    private GroceryRepository groceryRepository;
+    private ProductTestHelper productTestHelper;
 
     @Autowired
-    private WebTestClient webTestClient;
+    private StoreTestHelper storeTestHelper;
 
-    @BeforeEach
-    void startFresh() {
-        groceryRepository.deleteAll();
-    }
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     @Test
-    @DisplayName("Post Products")
+    @Order(1)
+    @DisplayName("Post Grocery")
+    @Rollback
     @Description("Scenario: Happy Path" +
             "Given POST v1/groceries is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved grocery")
-    public void addGrocery() {
+    public void addGrocery(){
+        // store will be used across this test file
+        Integer storeId = storeTestHelper.setupStore().getId();
+
         // given
-        Grocery requestBody = createGroceryRequestBody();
+        GroceryRequestModel requestBody = createGroceryRequestBody(storeId);
 
-        // when & then
-        WebTestClient.BodyContentSpec response = createGrocery(requestBody)
-                .expectStatus()
-                .isCreated()
-                .expectBody();
+        // when
+        ResponseEntity<Grocery> response = restTemplate.exchange(
+                GROCERY_URI,
+                HttpMethod.POST,
+                new HttpEntity<>(requestBody),
+                Grocery.class);
 
-        response.jsonPath("$.id").isNotEmpty();
-        response.jsonPath("$.name").isEqualTo(NAME_SAMPLE);
-        response.jsonPath("$.description").isEqualTo(DESCRIPTION_SAMPLE);
+        // then
+        Grocery addedGrocery = response.getBody();
+
+        assertThat(addedGrocery).isNotNull();
+        assertThat(addedGrocery.getId()).isNotNull(); // = 1
+        assertThat(addedGrocery.getName()).isEqualTo(NAME_SAMPLE);
+        assertThat(addedGrocery.getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
+        assertThat(addedGrocery.getStore().getName()).isEqualTo(MOCK_STORE_NAME);
+        assertThat(addedGrocery.getList()).isInstanceOf(List.class);
     }
 
     @Test
-    @DisplayName("Post Products")
+    @Order(2)
+    @DisplayName("Get Groceries")
     @Description("Scenario: Happy Path" +
             "Given GET v1/groceries is the endpoint" +
             "When the endpoint is called" +
             "Then it will send a response of saved grocery list")
     public void getGroceries() {
-        // setup
-        createGrocery(createGroceryRequestBody());
+        // when
+        ParameterizedTypeReference<List<Grocery>> responseType = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<Grocery>> response = restTemplate.exchange(
+                GROCERY_URI,
+                HttpMethod.GET,
+                null,
+                responseType);
 
-        // when & then
-        WebTestClient.BodyContentSpec response = webTestClient
-                .get()
-                .uri(GROCERY_URI)
-                .exchange()
-                .expectStatus()
-                .is2xxSuccessful()
-                .expectBody();
-
-        response.jsonPath("$[0].id").isNotEmpty();
-        response.jsonPath("$[0].name").isEqualTo(NAME_SAMPLE);
-        response.jsonPath("$[0].description").isEqualTo(DESCRIPTION_SAMPLE);
+        // then
+        List<Grocery> productImportList = response.getBody();
+        assertThat(productImportList).isNotNull();
+        assertThat(productImportList.get(0).getId()).isNotNull();
+        assertThat(productImportList.get(0).getName()).isEqualTo(NAME_SAMPLE);
+        assertThat(productImportList.get(0).getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
+        assertThat(productImportList.get(0).getStore().getName()).isEqualTo(MOCK_STORE_NAME);
+        assertThat(productImportList.get(0).getList()).isInstanceOf(List.class);
     }
 
-    private Grocery createGroceryRequestBody() {
-        return  Grocery.builder()
+    @Test
+    @Order(3)
+    @DisplayName("Post Grocery Item")
+    @Description("Scenario: Happy Path" +
+            "Given POST v1/groceries/{groceryId}/item is the endpoint" +
+            "When POST endpoint is called with correct request body" +
+            "Then it will send a response of saved grocery item")
+    public void addGroceryItem() {
+        // setup
+        ProductEntity productFromSetup = productTestHelper.setupProductsWithoutStore();
+
+        // given
+        GroceryItemRequestModel requestBody = GroceryItemRequestModel.builder()
+                .productId(productFromSetup.getId())
+                .actualPrice(100L)
+                .notes("Sample Grocery Item Notes")
+                .estimatedPrice(0L)
+                .build();
+
+        // when
+        ResponseEntity<GroceryItem> response = restTemplate.exchange(
+                String.format(GROCERY_ITEM_URI, GROCERY_ID),
+                HttpMethod.POST,
+                new HttpEntity<>(requestBody),
+                GroceryItem.class);
+
+        // then
+        GroceryItem newGroceryItem = response.getBody();
+        assertThat(newGroceryItem).isNotNull();
+        assertThat(newGroceryItem.getId()).isNotNull();
+        assertThat(newGroceryItem.getNotes()).isEqualTo("Sample Grocery Item Notes");
+        assertThat(newGroceryItem.getEstimatedPrice()).isEqualTo(0L);
+        assertThat(newGroceryItem.getActualPrice()).isEqualTo(100L);
+    }
+
+    private GroceryRequestModel createGroceryRequestBody(Integer storeId) {
+        return  GroceryRequestModel.builder()
                 .name(NAME_SAMPLE)
+                .storeId(storeId)
                 .description(DESCRIPTION_SAMPLE)
                 .build();
-    }
-
-    private WebTestClient.ResponseSpec createGrocery(Grocery requestBody) {
-        return webTestClient
-                .post()
-                .uri(GROCERY_URI)
-                .body(BodyInserters.fromValue(requestBody))
-                .exchange();
     }
 }
