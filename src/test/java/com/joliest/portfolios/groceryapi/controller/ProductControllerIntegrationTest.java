@@ -8,12 +8,17 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -22,15 +27,22 @@ import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRO
 import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCT_IMPORT_URI;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ProductControllerIntegrationTest extends BaseIntegrationTest {
+class ProductControllerIntegrationTest {
+    private static final String INIT_SCRIPT = "integration-testing/initScript.sql";
 
     @Autowired
     private ProductTestHelper productTestHelper;
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.0")
+            .withInitScript(INIT_SCRIPT);
 
     @Test
     @Order(1)
