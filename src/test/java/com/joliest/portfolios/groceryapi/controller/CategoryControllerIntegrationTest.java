@@ -3,6 +3,7 @@ package com.joliest.portfolios.groceryapi.controller;
 import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.Category;
+import com.joliest.portfolios.groceryapi.testHelper.BaseIntegrationTest;
 import com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper;
 import com.joliest.portfolios.groceryapi.testHelper.SubcategoryTestHelper;
 import org.junit.jupiter.api.DisplayName;

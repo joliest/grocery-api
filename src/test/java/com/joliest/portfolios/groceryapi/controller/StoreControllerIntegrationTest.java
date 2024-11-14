@@ -1,6 +1,7 @@
 package com.joliest.portfolios.groceryapi.controller;
 
 import com.joliest.portfolios.groceryapi.model.Store;
+import com.joliest.portfolios.groceryapi.testHelper.BaseIntegrationTest;
 import com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;

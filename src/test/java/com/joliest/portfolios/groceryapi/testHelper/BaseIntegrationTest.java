@@ -1,4 +1,4 @@
-package com.joliest.portfolios.groceryapi.controller;
+package com.joliest.portfolios.groceryapi.testHelper;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;

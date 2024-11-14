@@ -5,6 +5,7 @@ import com.joliest.portfolios.groceryapi.model.Grocery;
 import com.joliest.portfolios.groceryapi.model.GroceryRequestModel;
 import com.joliest.portfolios.groceryapi.model.GroceryItem;
 import com.joliest.portfolios.groceryapi.model.GroceryItemRequestModel;
+import com.joliest.portfolios.groceryapi.testHelper.BaseIntegrationTest;
 import com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper;
 import com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper;
 import org.junit.jupiter.api.DisplayName;
