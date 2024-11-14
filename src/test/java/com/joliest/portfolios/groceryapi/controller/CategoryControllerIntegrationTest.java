@@ -13,28 +13,23 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class CategoryControllerIntegrationTest {
+class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     static String CATERGORY_URI = "/v1/categories";
+    private static String TEST_NAME = "category-controller-integration-test";
 
     @Autowired
     private SubcategoryRepository subcategoryRepository;
@@ -47,10 +42,6 @@ class CategoryControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
 
     @Test
     @Order(1)
@@ -112,9 +103,11 @@ class CategoryControllerIntegrationTest {
             "Then it's Subcategories will also be deleted")
     public void deleteCategoryCascade() {
         // given
-        Integer categoryId = categoryTestHelper.setupCategories().get(0);
+        Integer categoryId = categoryTestHelper
+                .setupCategory(TEST_NAME)
+                .getId();
         Integer subcategoryId = subcategoryTestHelper
-                .setupSubcategoryWithCategoryId(categoryId)
+                .setupSubcategoryWithCategory(TEST_NAME, categoryId)
                 .getId();
 
         // when

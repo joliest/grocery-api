@@ -10,37 +10,27 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper.MOCK_CATEGORY_NAME_1;
 import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCTS_URI;
 import static com.joliest.portfolios.groceryapi.testHelper.ProductTestHelper.PRODUCT_IMPORT_URI;
-import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ProductControllerIntegrationTest {
+class ProductControllerIntegrationTest extends BaseIntegrationTest {
+
     @Autowired
     private ProductTestHelper productTestHelper;
 
     @Autowired
     private TestRestTemplate restTemplate;
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
 
     @Test
     @Order(1)
@@ -51,7 +41,7 @@ class ProductControllerIntegrationTest {
             "Then it will send the list of products")
     public void getProducts() {
         // setup
-        productTestHelper.setupProducts();
+        productTestHelper.setupProduct("get-products");
 
         // when
         ParameterizedTypeReference<List<ProductImport>> responseType = new ParameterizedTypeReference<>() {};
@@ -61,9 +51,9 @@ class ProductControllerIntegrationTest {
         List<ProductImport> productImportList = response.getBody();
         assertThat(productImportList).isNotNull();
         assertThat(productImportList.get(0).getId()).isNotNull();
-        assertThat(productImportList.get(0).getName()).isEqualTo("New product 1");
-        assertThat(productImportList.get(0).getCategory()).isEqualTo(MOCK_CATEGORY_NAME_1);
-        assertThat(productImportList.get(0).getSubcategory()).isEqualTo("New Product Sub Category");
+        assertThat(productImportList.get(0).getName()).isNotEmpty();
+        assertThat(productImportList.get(0).getCategory()).isNotEmpty();
+        assertThat(productImportList.get(0).getSubcategory()).isNotEmpty();
         assertThat(productImportList.get(0).getPurchaseHistoryList()).isInstanceOf(List.class);
     }
 

@@ -5,15 +5,12 @@ import com.joliest.portfolios.groceryapi.domain.entity.CategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.SubcategoryEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-
-import static com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper.CATEGORY_TEST_ID_1;
 
 @Service
 public class ProductTestHelper {
@@ -35,48 +32,30 @@ public class ProductTestHelper {
     private CategoryTestHelper categoryTestHelper;
 
     @Autowired
-    private SubcategoryRepository subcategoryRepository;
+    private SubcategoryTestHelper subcategoryTestHelper;
 
-    public ProductEntity setupProducts() {
-        storeTestHelper.setupStore();
-        ProductEntity productEntityToSave = createProduct();
-        return productRepository.save(productEntityToSave);
+    public ProductEntity setupProduct(String baseName) {
+        storeTestHelper.setupStore(format(baseName, "store-name"));
+        CategoryEntity categoryEntity = categoryTestHelper.setupCategory(format(baseName, "category-name"));
+        SubcategoryEntity subcategoryEntity = subcategoryTestHelper.setupSubcategoryWithCategory(format(baseName, "subcategory-name"), categoryEntity.getId());
+        return setupProductsWithCategoryAndSubcategory(categoryEntity, subcategoryEntity);
     }
 
     // special use in GroceryControllerIntegrationTest
-    public ProductEntity setupProductsWithoutStore() {
-        ProductEntity productEntityToSave = createProduct();
+    public ProductEntity setupProductsWithCategoryAndSubcategory(CategoryEntity category, SubcategoryEntity subcategory) {
+        ProductEntity productEntityToSave = createProduct(category, subcategory);
         return productRepository.save(productEntityToSave);
     }
 
-    public ProductEntity createProduct() {
-        categoryTestHelper.setupCategories();
-        setupSubcategory();
-
-        CategoryEntity category = CategoryEntity.builder()
-                .id(CATEGORY_TEST_ID_1)
-                .build();
+    public ProductEntity createProduct(CategoryEntity category, SubcategoryEntity subcategory) {
         return ProductEntity.builder()
                 .name("New product 1")
                 .category(category)
                 .subcategory(SubcategoryEntity.builder()
                         .category(category)
-                        .id(SUB_CATEGORY_TEST_ID)
+                        .id(subcategory.getId())
                         .build())
                 .build();
-    }
-
-    public void setupSubcategory() {
-        SubcategoryEntity subcategory = SubcategoryEntity.builder()
-                .category(CategoryEntity.builder()
-                        .id(CATEGORY_TEST_ID_1)
-                        .build())
-                .name("New Product Sub Category")
-                .description("Subcategory Description")
-                .build();
-
-        // ID is automatically set to 1
-        subcategoryRepository.save(subcategory);
     }
 
     public List<ProductImport> createRequestBody() {
@@ -89,5 +68,9 @@ public class ProductTestHelper {
                 .store("New store name")
                 .datePurchased(MOCK_STRING_DATE_2)
                 .build());
+    }
+
+    private String format(String baseName, String suffix) {
+        return String.format("%s-%s", baseName, suffix);
     }
 }

@@ -10,25 +10,19 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class StoreControllerIntegrationTest {
+class StoreControllerIntegrationTest extends BaseIntegrationTest {
 
     static String STORES_URI = "/v1/stores";
 
@@ -37,10 +31,6 @@ class StoreControllerIntegrationTest {
 
     @Autowired
     private StoreTestHelper storeTestHelper;
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
 
     @Test
     @Order(1)
@@ -54,6 +44,8 @@ class StoreControllerIntegrationTest {
 
         ResponseEntity<List<Store>> response = restTemplate.exchange(STORES_URI, HttpMethod.POST, new HttpEntity<>(requestBody), new ParameterizedTypeReference<>() {});
         List<Store> stores = response.getBody();
+
+        assertThat(stores).isNotNull();
 
         assertThat(stores.get(0).getName()).isNotNull();
         assertThat(stores.get(0).getDescription()).isNotNull();
@@ -74,6 +66,8 @@ class StoreControllerIntegrationTest {
         ParameterizedTypeReference<List<Store>> responseType = new ParameterizedTypeReference<>() {};
         ResponseEntity<List<Store>> response = restTemplate.exchange(STORES_URI, HttpMethod.GET, null, responseType);
         List<Store> stores = response.getBody();
+
+        assertThat(stores).isNotNull();
 
         assertThat(stores.get(0).getName()).isNotNull();
         assertThat(stores.get(0).getDescription()).isNotNull();

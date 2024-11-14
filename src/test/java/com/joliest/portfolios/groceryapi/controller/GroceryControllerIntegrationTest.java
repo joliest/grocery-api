@@ -15,32 +15,26 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.Rollback;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static com.joliest.portfolios.groceryapi.testHelper.StoreTestHelper.MOCK_STORE_NAME;
-import static com.joliest.portfolios.groceryapi.testHelper.TestContainerConstants.getPostgreSqlContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class GroceryControllerIntegrationTest {
+class GroceryControllerIntegrationTest extends BaseIntegrationTest {
     static Integer GROCERY_ID = 1; // newly created grocery in this file will be 1
     static String GROCERY_URI = "/v1/groceries";
     static String GROCERY_ITEM_URI = "/v1/groceries/%s/item";
     static String NAME_SAMPLE = "New Grocery";
     static String DESCRIPTION_SAMPLE = "Description";
+    static String STORE_NAME = "add-grocery-store";
+    static String PRODUCT_NAME = "add-grocery-product";
 
     @Autowired
     private ProductTestHelper productTestHelper;
@@ -51,21 +45,16 @@ class GroceryControllerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = getPostgreSqlContainer();
-
     @Test
     @Order(1)
     @DisplayName("Post Grocery")
-    @Rollback
     @Description("Scenario: Happy Path" +
             "Given POST v1/groceries is the endpoint" +
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved grocery")
     public void addGrocery(){
         // store will be used across this test file
-        Integer storeId = storeTestHelper.setupStore().getId();
+        Integer storeId = storeTestHelper.setupStore(STORE_NAME).getId();
 
         // given
         GroceryRequestModel requestBody = createGroceryRequestBody(storeId);
@@ -84,7 +73,7 @@ class GroceryControllerIntegrationTest {
         assertThat(addedGrocery.getId()).isNotNull(); // = 1
         assertThat(addedGrocery.getName()).isEqualTo(NAME_SAMPLE);
         assertThat(addedGrocery.getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
-        assertThat(addedGrocery.getStore().getName()).isEqualTo(MOCK_STORE_NAME);
+        assertThat(addedGrocery.getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(addedGrocery.getList()).isInstanceOf(List.class);
     }
 
@@ -110,7 +99,7 @@ class GroceryControllerIntegrationTest {
         assertThat(productImportList.get(0).getId()).isNotNull();
         assertThat(productImportList.get(0).getName()).isEqualTo(NAME_SAMPLE);
         assertThat(productImportList.get(0).getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
-        assertThat(productImportList.get(0).getStore().getName()).isEqualTo(MOCK_STORE_NAME);
+        assertThat(productImportList.get(0).getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(productImportList.get(0).getList()).isInstanceOf(List.class);
     }
 
@@ -123,7 +112,7 @@ class GroceryControllerIntegrationTest {
             "Then it will send a response of saved grocery item")
     public void addGroceryItem() {
         // setup
-        ProductEntity productFromSetup = productTestHelper.setupProductsWithoutStore();
+        ProductEntity productFromSetup = productTestHelper.setupProduct(PRODUCT_NAME);
 
         // given
         GroceryItemRequestModel requestBody = GroceryItemRequestModel.builder()
