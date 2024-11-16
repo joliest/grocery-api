@@ -7,7 +7,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 public abstract class BaseIntegrationTest {
     private static final String INIT_SCRIPT = "integration-testing/initScript.sql";
-    private static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16.0")
+    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16.0")
             .withUsername("username")
             .withPassword("password")
             .withInitScript(INIT_SCRIPT);

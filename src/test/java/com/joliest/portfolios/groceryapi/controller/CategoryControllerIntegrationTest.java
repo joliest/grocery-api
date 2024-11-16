@@ -6,6 +6,7 @@ import com.joliest.portfolios.groceryapi.model.Category;
 import com.joliest.portfolios.groceryapi.testHelper.BaseIntegrationTest;
 import com.joliest.portfolios.groceryapi.testHelper.CategoryTestHelper;
 import com.joliest.portfolios.groceryapi.testHelper.SubcategoryTestHelper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -44,6 +45,8 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    private Integer idToDelete = null;
+
     @Test
     @Order(1)
     @DisplayName("Create Categories")
@@ -54,14 +57,16 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     public void postCategories() {
         List<Category> requestBody = categoryTestHelper.createRequestBody();
         ResponseEntity<List<Category>> response = restTemplate.exchange(CATERGORY_URI, HttpMethod.POST, new HttpEntity<>(requestBody), new ParameterizedTypeReference<>() {});
-        List<Category> stores = response.getBody();
+        List<Category> categories = response.getBody();
 
-        assert stores != null;
-        assertThat(stores.get(0).getName()).isNotNull();
-        assertThat(stores.get(0).getDescription()).isNotNull();
+        assert categories != null;
+        assertThat(categories.get(0).getName()).isNotNull();
+        assertThat(categories.get(0).getDescription()).isNotNull();
 
-        assertThat(stores.get(1).getName()).isNotNull();
-        assertThat(stores.get(1).getDescription()).isNotNull();
+        assertThat(categories.get(1).getName()).isNotNull();
+        assertThat(categories.get(1).getDescription()).isNotNull();
+
+        this.idToDelete = categories.get(0).getId();
     }
 
     @Test
@@ -74,14 +79,14 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     public void getCategories() {
         ParameterizedTypeReference<List<Category>> responseType = new ParameterizedTypeReference<>() {};
         ResponseEntity<List<Category>> response = restTemplate.exchange(CATERGORY_URI, HttpMethod.GET, null, responseType);
-        List<Category> stores = response.getBody();
+        List<Category> categories = response.getBody();
 
-        assert stores != null;
-        assertThat(stores.get(0).getName()).isNotNull();
-        assertThat(stores.get(0).getDescription()).isNotNull();
+        assert categories != null;
+        assertThat(categories.get(0).getName()).isNotNull();
+        assertThat(categories.get(0).getDescription()).isNotNull();
 
-        assertThat(stores.get(1).getName()).isNotNull();
-        assertThat(stores.get(1).getDescription()).isNotNull();
+        assertThat(categories.get(1).getName()).isNotNull();
+        assertThat(categories.get(1).getDescription()).isNotNull();
     }
 
     @Test
@@ -92,7 +97,19 @@ class CategoryControllerIntegrationTest extends BaseIntegrationTest {
             "When DELETE Endpoint is called" +
             "Then category id should be deleted")
     public void deleteCategory() {
-        ResponseEntity<Void> response = restTemplate.exchange(CATERGORY_URI + "/" + 1, HttpMethod.DELETE, HttpEntity.EMPTY, Void.class);
+        // given
+        Integer categoryId = categoryTestHelper
+                .setupCategory(TEST_NAME)
+                .getId();
+
+        // when
+        ResponseEntity<Void> response = restTemplate.exchange(
+                CATERGORY_URI + "/" + categoryId,
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                Void.class);
+
+        // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 

@@ -12,14 +12,14 @@ import static java.util.Arrays.asList;
 
 @Service
 public class CategoryTestHelper {
-    public static final Integer CATEGORY_TEST_ID_1 = 1;
-    public static final String MOCK_CATEGORY_NAME_1 = "Category 1";
     @Autowired
     private CategoryRepository categoryRepository;
 
     public CategoryEntity setupCategory(String categoryName) {
+        String description = String.format("%s-description", categoryName);
         CategoryEntity categoryEntity = CategoryEntity.builder()
                 .name(categoryName)
+                .description(description)
                 .build();
         return categoryRepository.save(categoryEntity);
     }
