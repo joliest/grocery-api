@@ -67,7 +67,7 @@ class GroceryControllerTest {
                 .build());
         when(groceryService.getGroceries())
                 .thenReturn(fetchedGroceries);
-        List<Grocery> actual = groceryService.getGroceries();
+        List<Grocery> actual = groceryController.getGroceries();
 
         // then
         List<Grocery>  expectedGroceries = Collections.singletonList(Grocery.builder()
@@ -76,5 +76,32 @@ class GroceryControllerTest {
                 .name(DESCRIPTION_SAMPLE)
                 .build());
         assertEquals(expectedGroceries, actual);
+    }
+
+    @Test
+    @Description("Given grocery id is provided" +
+            "When get grocery by id is called" +
+            "Then it should return a grocery")
+    public void getGroceryById() {
+        // given
+        Integer id = ID_SAMPLE;
+
+        // when
+        Grocery fetchedGrocery = Grocery.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build();
+        when(groceryService.getGroceryById(ID_SAMPLE))
+                .thenReturn(fetchedGrocery);
+        Grocery actual = groceryController.getGroceryById(id);
+
+        // then
+        Grocery expectedGrocery = Grocery.builder()
+                .id(ID_SAMPLE)
+                .name(NAME_SAMPLE)
+                .name(DESCRIPTION_SAMPLE)
+                .build();
+        assertEquals(expectedGrocery, actual);
     }
 }

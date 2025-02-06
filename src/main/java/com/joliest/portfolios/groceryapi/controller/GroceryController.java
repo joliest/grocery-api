@@ -43,4 +43,10 @@ public class GroceryController {
     ) {
         return groceryService.addGroceryItem(groceryId, requestBody);
     }
+
+    @GetMapping("/{groceryId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Grocery getGroceryById(@PathVariable Integer groceryId) {
+        return groceryService.getGroceryById(groceryId);
+    }
 }

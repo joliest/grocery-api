@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GroceryControllerIntegrationTest extends BaseIntegrationTest {
     static Integer GROCERY_ID = 1; // newly created grocery in this file will be 1
     static String GROCERY_URI = "/v1/groceries";
+    static String GROCERY_BY_ID_URI = "/v1/groceries/%s";
     static String GROCERY_ITEM_URI = "/v1/groceries/%s/item";
     static String NAME_SAMPLE = "New Grocery";
     static String DESCRIPTION_SAMPLE = "Description";
@@ -106,6 +107,35 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @Order(3)
+    @DisplayName("Get Grocery by Id")
+    @Description("Scenario: Happy Path" +
+            "Given a valid grocery id is provided" +
+            "And GET v1/groceries/{groceryId} is the endpoint" +
+            "When the endpoint is called" +
+            "Then it will send a grocery")
+    public void getGroceryById() {
+        // given
+        String urlWithId = String.format(GROCERY_BY_ID_URI, GROCERY_ID);
+
+        // when
+        ResponseEntity<Grocery> response = restTemplate.exchange(
+                urlWithId,
+                HttpMethod.GET,
+                null,
+                Grocery.class);
+
+        // then
+        Grocery grocery = response.getBody();
+        assertThat(grocery).isNotNull();
+        assertThat(grocery.getId()).isNotNull();
+        assertThat(grocery.getName()).isEqualTo(NAME_SAMPLE);
+        assertThat(grocery.getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
+        assertThat(grocery.getStore().getName()).isEqualTo(STORE_NAME);
+        assertThat(grocery.getList()).isInstanceOf(List.class);
+    }
+
+    @Test
+    @Order(4)
     @DisplayName("Post Grocery Item")
     @Description("Scenario: Happy Path" +
             "Given POST v1/groceries/{groceryId}/item is the endpoint" +

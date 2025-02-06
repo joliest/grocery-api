@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +65,10 @@ public class GroceryService {
 
         GroceryItemEntity savedGroceryItem = groceryItemRepository.save(groceryItemEntity);
         return GroceryUtil.convertEntityToGroceryItem(savedGroceryItem);
+    }
+
+    public Grocery getGroceryById(Integer id) {
+        Optional<GroceryEntity> fetchedGrocery = groceryRepository.findById(id);
+        return fetchedGrocery.map(GroceryUtil::convertEntityToGrocery).orElse(null);
     }
 }
