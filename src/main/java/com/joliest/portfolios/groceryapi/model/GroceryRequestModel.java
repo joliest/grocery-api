@@ -13,5 +13,4 @@ public class GroceryRequestModel {
     private Integer id;
     private String name;
     private String description;
-    private Integer storeId;
 }

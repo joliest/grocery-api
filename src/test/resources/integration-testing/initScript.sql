@@ -44,9 +44,7 @@ create table grocery
 (
     id      serial      primary key,
     name    varchar(500)    not null,
-    description     varchar(1000),
-    store_id    int    default null,
-    foreign key (store_id) references store(id)
+    description     varchar(1000)
 );
 create table grocery_item
 (

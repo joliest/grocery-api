@@ -3,11 +3,9 @@ package com.joliest.portfolios.groceryapi.service;
 import com.joliest.portfolios.groceryapi.domain.entity.GroceryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.GroceryItemEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
-import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.GroceryItemRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.GroceryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
-import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.exception.NotFoundException;
 import com.joliest.portfolios.groceryapi.model.Grocery;
 import com.joliest.portfolios.groceryapi.model.GroceryItemRequestModel;
@@ -24,17 +22,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GroceryService {
     private final GroceryRepository groceryRepository;
-    private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
     private final GroceryItemRepository groceryItemRepository;
 
     public Grocery addGrocery(GroceryRequestModel grocery) {
-        StoreEntity storeEntity = storeRepository.findById(grocery.getStoreId())
-                .orElseThrow(() -> new NotFoundException("Invalid store id"));
         GroceryEntity groceryEntity = GroceryEntity.builder()
                 .name(grocery.getName())
                 .description(grocery.getDescription())
-                .store(storeEntity)
                 .build();
         GroceryEntity savedGrocery = groceryRepository.save(groceryEntity);
         return GroceryUtil.convertEntityToGrocery(savedGrocery);
