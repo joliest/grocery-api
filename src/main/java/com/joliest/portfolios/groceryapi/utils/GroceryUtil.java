@@ -31,6 +31,7 @@ public class GroceryUtil {
         return GroceryItem.builder()
                 .id(groceryItemEntity.getId())
                 .product(ProductUtil.convertEntityToProduct(groceryItemEntity.getProduct(), false))
+                .store(StoreUtil.convertEntityToStore(groceryItemEntity.getStore()))
                 .quantity(groceryItemEntity.getQuantity())
                 .actualPrice(groceryItemEntity.getActualPrice())
                 .estimatedPrice(groceryItemEntity.getEstimatedPrice())

@@ -17,4 +17,5 @@ public class GroceryItem {
     private Long estimatedPrice;
 
     private Product product;
+    private Store store;
 }

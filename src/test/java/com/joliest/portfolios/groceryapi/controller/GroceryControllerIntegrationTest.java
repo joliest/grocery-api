@@ -137,6 +137,8 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
             "Then it will send a response of saved grocery item")
     public void addGroceryItem() {
         // setup
+        // store will be used across this test file
+        Integer storeId = storeTestHelper.setupStore(STORE_NAME).getId();
         ProductEntity productFromSetup = productTestHelper.setupProduct(PRODUCT_NAME);
 
         // given
@@ -145,6 +147,7 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
                 .actualPrice(100L)
                 .notes("Sample Grocery Item Notes")
                 .estimatedPrice(0L)
+                .storeId(storeId)
                 .build();
 
         // when
@@ -160,6 +163,7 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
         assertThat(newGroceryItem.getId()).isNotNull();
         assertThat(newGroceryItem.getNotes()).isEqualTo("Sample Grocery Item Notes");
         assertThat(newGroceryItem.getEstimatedPrice()).isEqualTo(0L);
+        assertThat(newGroceryItem.getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(newGroceryItem.getActualPrice()).isEqualTo(100L);
     }
 

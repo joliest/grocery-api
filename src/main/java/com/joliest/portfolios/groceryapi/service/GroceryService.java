@@ -3,9 +3,11 @@ package com.joliest.portfolios.groceryapi.service;
 import com.joliest.portfolios.groceryapi.domain.entity.GroceryEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.GroceryItemEntity;
 import com.joliest.portfolios.groceryapi.domain.entity.ProductEntity;
+import com.joliest.portfolios.groceryapi.domain.entity.StoreEntity;
 import com.joliest.portfolios.groceryapi.domain.repository.GroceryItemRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.GroceryRepository;
 import com.joliest.portfolios.groceryapi.domain.repository.ProductRepository;
+import com.joliest.portfolios.groceryapi.domain.repository.StoreRepository;
 import com.joliest.portfolios.groceryapi.exception.NotFoundException;
 import com.joliest.portfolios.groceryapi.model.Grocery;
 import com.joliest.portfolios.groceryapi.model.GroceryItemRequestModel;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class GroceryService {
     private final GroceryRepository groceryRepository;
     private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
     private final GroceryItemRepository groceryItemRepository;
 
     public Grocery addGrocery(GroceryRequestModel grocery) {
@@ -47,10 +50,13 @@ public class GroceryService {
                 .orElseThrow(() -> new NotFoundException("Invalid grocery id"));
         ProductEntity productEntity = productRepository.findById(requestBody.getProductId())
                 .orElseThrow(() -> new NotFoundException("Invalid product id"));
+        StoreEntity storeEntity = storeRepository.findById(requestBody.getStoreId())
+                .orElseThrow(() -> new NotFoundException("Invalid store id"));
 
         GroceryItemEntity groceryItemEntity = GroceryItemEntity.builder()
                 .product(productEntity)
                 .grocery(groceryEntity)
+                .store(storeEntity)
                 .quantity(requestBody.getQuantity())
                 .notes(requestBody.getNotes())
                 .actualPrice(requestBody.getActualPrice())

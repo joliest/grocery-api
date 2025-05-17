@@ -39,6 +39,11 @@ class GroceryUtilTest {
                                         .name("Subcategory")
                                         .build())
                                 .build())
+                                .store(StoreEntity.builder()
+                                        .id(4)
+                                        .name("Store name")
+                                        .description("Store description")
+                                        .build())
                         .build()))
                 .build();
 
@@ -52,6 +57,11 @@ class GroceryUtilTest {
                         .product(Product.builder()
                                 .category("Category")
                                 .subcategory("Subcategory")
+                                .build())
+                        .store(Store.builder()
+                                .id(4)
+                                .name("Store name")
+                                .description("Store description")
                                 .build())
                         .build()))
                 .build();
