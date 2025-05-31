@@ -8,7 +8,6 @@ import com.joliest.portfolios.groceryapi.model.GroceryItem;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.joliest.portfolios.groceryapi.utils.StoreUtil.convertEntityToStore;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 public class GroceryUtil {
@@ -23,7 +22,6 @@ public class GroceryUtil {
         return Grocery.builder()
                 .id(groceryEntity.getId())
                 .name(groceryEntity.getName())
-                .store(convertEntityToStore(groceryEntity.getStore()))
                 .description(groceryEntity.getDescription())
                 .list(list)
                 .build();
@@ -33,6 +31,7 @@ public class GroceryUtil {
         return GroceryItem.builder()
                 .id(groceryItemEntity.getId())
                 .product(ProductUtil.convertEntityToProduct(groceryItemEntity.getProduct(), false))
+                .store(StoreUtil.convertEntityToStore(groceryItemEntity.getStore()))
                 .quantity(groceryItemEntity.getQuantity())
                 .actualPrice(groceryItemEntity.getActualPrice())
                 .estimatedPrice(groceryItemEntity.getEstimatedPrice())

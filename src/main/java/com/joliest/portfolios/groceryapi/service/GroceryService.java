@@ -24,17 +24,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GroceryService {
     private final GroceryRepository groceryRepository;
-    private final StoreRepository storeRepository;
     private final ProductRepository productRepository;
+    private final StoreRepository storeRepository;
     private final GroceryItemRepository groceryItemRepository;
 
     public Grocery addGrocery(GroceryRequestModel grocery) {
-        StoreEntity storeEntity = storeRepository.findById(grocery.getStoreId())
-                .orElseThrow(() -> new NotFoundException("Invalid store id"));
         GroceryEntity groceryEntity = GroceryEntity.builder()
                 .name(grocery.getName())
                 .description(grocery.getDescription())
-                .store(storeEntity)
                 .build();
         GroceryEntity savedGrocery = groceryRepository.save(groceryEntity);
         return GroceryUtil.convertEntityToGrocery(savedGrocery);
@@ -53,10 +50,13 @@ public class GroceryService {
                 .orElseThrow(() -> new NotFoundException("Invalid grocery id"));
         ProductEntity productEntity = productRepository.findById(requestBody.getProductId())
                 .orElseThrow(() -> new NotFoundException("Invalid product id"));
+        StoreEntity storeEntity = storeRepository.findById(requestBody.getStoreId())
+                .orElseThrow(() -> new NotFoundException("Invalid store id"));
 
         GroceryItemEntity groceryItemEntity = GroceryItemEntity.builder()
                 .product(productEntity)
                 .grocery(groceryEntity)
+                .store(storeEntity)
                 .quantity(requestBody.getQuantity())
                 .notes(requestBody.getNotes())
                 .actualPrice(requestBody.getActualPrice())

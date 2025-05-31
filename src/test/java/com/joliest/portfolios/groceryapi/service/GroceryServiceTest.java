@@ -41,8 +41,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GroceryServiceTest {
     static Integer MOCK_PRODUCT_ID = 1;
-    static Integer MOCK_STORE_ID = 2;
     static Integer MOCK_GROCERY_ID = 3;
+    static Integer MOCK_STORE_ID = 2;
     static String MOCK_GROCERY_NAME = "New Grocery";
     static String MOCK_DESCRIPTION = "Description";
 
@@ -50,10 +50,10 @@ class GroceryServiceTest {
     private GroceryRepository groceryRepository;
 
     @Mock
-    private StoreRepository storeRepository;
+    private ProductRepository productRepository;
 
     @Mock
-    private ProductRepository productRepository;
+    private StoreRepository storeRepository;
 
     @Mock
     private GroceryItemRepository groceryItemRepository;
@@ -69,20 +69,14 @@ class GroceryServiceTest {
         GroceryRequestModel requestBody = GroceryRequestModel.builder()
                 .name(MOCK_GROCERY_NAME)
                 .description(MOCK_DESCRIPTION)
-                .storeId(MOCK_STORE_ID)
                 .build();
 
         // when
-        StoreEntity foundStoreEntity = StoreEntity.builder().build();
-        when(storeRepository.findById(any(Integer.class)))
-                .thenReturn(Optional.of(foundStoreEntity));
         when(groceryRepository.save(any(GroceryEntity.class)))
                 .thenReturn(GroceryEntity.builder()
-                        .store(StoreEntity.builder().build())
                         .build());
 
         Grocery convertedEntityToGrocery = Grocery.builder()
-                .store(Store.builder().build())
                 .list(emptyList())
                 .build();
 
@@ -93,40 +87,15 @@ class GroceryServiceTest {
     }
 
     @Test
-    @DisplayName("Given store id is not found" +
-            "When add grocery is called," +
-            "Then it does not save and throws error")
-    void addGrocery_storeNotExist() {
-        // given
-        Optional<StoreEntity> foundStoreEntity = Optional.empty();
-        GroceryRequestModel requestBody = GroceryRequestModel.builder()
-                .name(MOCK_GROCERY_NAME)
-                .description(MOCK_DESCRIPTION)
-                .storeId(MOCK_STORE_ID)
-                .build();
-
-        // when
-        when(storeRepository.findById(any(Integer.class)))
-                .thenReturn(foundStoreEntity);
-
-        // then
-        assertThrows(NotFoundException.class, () -> groceryService.addGrocery(requestBody));
-        verify(groceryRepository, never()).save(any(GroceryEntity.class));
-    }
-
-    @Test
     @DisplayName("When get groceries is called" +
             "Then it returns list of saved groceries")
     void getGroceries() {
         // when
-        List<GroceryEntity> fetchedGroceries = singletonList(GroceryEntity.builder()
-                .store(StoreEntity.builder().build())
-                .build());
+        List<GroceryEntity> fetchedGroceries = singletonList(GroceryEntity.builder().build());
         when(groceryRepository.findAll()).thenReturn(fetchedGroceries);
 
         // then
         List<Grocery> expectedGroceries = singletonList(Grocery.builder()
-                .store(Store.builder().build())
                 .list(emptyList())
                 .build());
         List<Grocery> actual = groceryService.getGroceries();
@@ -142,6 +111,7 @@ class GroceryServiceTest {
         Integer groceryId = MOCK_GROCERY_ID;
         GroceryItemRequestModel requestModel = GroceryItemRequestModel.builder()
                 .productId(MOCK_PRODUCT_ID)
+                .storeId(MOCK_STORE_ID)
                 .build();
 
         // when
@@ -149,6 +119,8 @@ class GroceryServiceTest {
                 .thenReturn(Optional.of(GroceryEntity.builder().build()));
         when(productRepository.findById(MOCK_PRODUCT_ID))
                 .thenReturn(Optional.of(ProductEntity.builder().build()));
+        when(storeRepository.findById(MOCK_STORE_ID))
+                .thenReturn(Optional.of(StoreEntity.builder().build()));
 
         GroceryItemEntity savedGroceryItemEntity = GroceryItemEntity.builder()
                 .product(ProductEntity.builder()
@@ -159,6 +131,10 @@ class GroceryServiceTest {
                                 .name("Subcategory")
                                 .build())
                         .build())
+                .store(StoreEntity.builder()
+                        .id(MOCK_STORE_ID)
+                        .name("Store name")
+                        .build())
                 .build();
         when(groceryItemRepository.save(any(GroceryItemEntity.class)))
                 .thenReturn(savedGroceryItemEntity);
@@ -167,6 +143,10 @@ class GroceryServiceTest {
                 .product(Product.builder()
                         .category("Category")
                         .subcategory("Subcategory")
+                        .build())
+                .store(Store.builder()
+                        .id(MOCK_STORE_ID)
+                        .name("Store name")
                         .build())
                 .build();
 
@@ -226,6 +206,36 @@ class GroceryServiceTest {
     }
 
     @Test
+    @DisplayName("Given grocery is found" +
+            "And product is found" +
+            "And store is not found" +
+            "When add groceries item is called" +
+            "Then it returns not found exception" +
+            "And it does not save")
+    void addGroceryItem_storeIdIsNotFound() {
+        Integer groceryId = MOCK_GROCERY_ID;
+        GroceryItemRequestModel requestModel = GroceryItemRequestModel.builder()
+                .productId(MOCK_PRODUCT_ID)
+                .storeId(MOCK_STORE_ID)
+                .build();
+
+        // given
+        Optional<StoreEntity> notFoundStoreEntity = Optional.empty();
+
+        // when
+        when(groceryRepository.findById(MOCK_GROCERY_ID))
+                .thenReturn(Optional.of(GroceryEntity.builder().build()));
+        when(productRepository.findById(MOCK_PRODUCT_ID))
+                .thenReturn(Optional.ofNullable(ProductEntity.builder().build()));
+        when(storeRepository.findById(MOCK_STORE_ID))
+                .thenReturn(notFoundStoreEntity);
+        assertThrows(NotFoundException.class, () -> groceryService.addGroceryItem(groceryId, requestModel));
+
+        // then
+        verify(groceryItemRepository, never()).save(any(GroceryItemEntity.class));
+    }
+
+    @Test
     @DisplayName("Given a valid grocery id is provided" +
             "When get grocery by id is called" +
             "Then it returns the grocery")
@@ -234,12 +244,9 @@ class GroceryServiceTest {
         Integer givenGroceryId = MOCK_GROCERY_ID;
 
         // when
-        GroceryEntity fetchedGrocery = GroceryEntity.builder()
-                .store(StoreEntity.builder().build())
-                .build();
+        GroceryEntity fetchedGrocery = GroceryEntity.builder().build();
         when(groceryRepository.findById(givenGroceryId)).thenReturn(Optional.of(fetchedGrocery));
         Grocery expectedGrocery = Grocery.builder()
-                .store(Store.builder().build())
                 .list(emptyList())
                 .build();
         Grocery actual = groceryService.getGroceryById(givenGroceryId);

@@ -55,11 +55,8 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
             "When POST endpoint is called with correct request body" +
             "Then it will send a response of saved grocery")
     public void addGrocery(){
-        // store will be used across this test file
-        Integer storeId = storeTestHelper.setupStore(STORE_NAME).getId();
-
         // given
-        GroceryRequestModel requestBody = createGroceryRequestBody(storeId);
+        GroceryRequestModel requestBody = createGroceryRequestBody();
 
         // when
         ResponseEntity<Grocery> response = restTemplate.exchange(
@@ -75,7 +72,6 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
         assertThat(addedGrocery.getId()).isNotNull(); // = 1
         assertThat(addedGrocery.getName()).isEqualTo(NAME_SAMPLE);
         assertThat(addedGrocery.getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
-        assertThat(addedGrocery.getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(addedGrocery.getList()).isInstanceOf(List.class);
     }
 
@@ -101,7 +97,6 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
         assertThat(productImportList.get(0).getId()).isNotNull();
         assertThat(productImportList.get(0).getName()).isEqualTo(NAME_SAMPLE);
         assertThat(productImportList.get(0).getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
-        assertThat(productImportList.get(0).getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(productImportList.get(0).getList()).isInstanceOf(List.class);
     }
 
@@ -130,7 +125,6 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
         assertThat(grocery.getId()).isNotNull();
         assertThat(grocery.getName()).isEqualTo(NAME_SAMPLE);
         assertThat(grocery.getDescription()).isEqualTo(DESCRIPTION_SAMPLE);
-        assertThat(grocery.getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(grocery.getList()).isInstanceOf(List.class);
     }
 
@@ -143,6 +137,8 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
             "Then it will send a response of saved grocery item")
     public void addGroceryItem() {
         // setup
+        // store will be used across this test file
+        Integer storeId = storeTestHelper.setupStore(STORE_NAME).getId();
         ProductEntity productFromSetup = productTestHelper.setupProduct(PRODUCT_NAME);
 
         // given
@@ -151,6 +147,7 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
                 .actualPrice(100L)
                 .notes("Sample Grocery Item Notes")
                 .estimatedPrice(0L)
+                .storeId(storeId)
                 .build();
 
         // when
@@ -166,13 +163,13 @@ class GroceryControllerIntegrationTest extends BaseIntegrationTest {
         assertThat(newGroceryItem.getId()).isNotNull();
         assertThat(newGroceryItem.getNotes()).isEqualTo("Sample Grocery Item Notes");
         assertThat(newGroceryItem.getEstimatedPrice()).isEqualTo(0L);
+        assertThat(newGroceryItem.getStore().getName()).isEqualTo(STORE_NAME);
         assertThat(newGroceryItem.getActualPrice()).isEqualTo(100L);
     }
 
-    private GroceryRequestModel createGroceryRequestBody(Integer storeId) {
+    private GroceryRequestModel createGroceryRequestBody() {
         return  GroceryRequestModel.builder()
                 .name(NAME_SAMPLE)
-                .storeId(storeId)
                 .description(DESCRIPTION_SAMPLE)
                 .build();
     }

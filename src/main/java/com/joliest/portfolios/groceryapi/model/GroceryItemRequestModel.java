@@ -22,4 +22,6 @@ public class GroceryItemRequestModel {
 
     @NotNull
     private Integer productId;
+    @NotNull
+    private Integer storeId;
 }

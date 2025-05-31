@@ -44,9 +44,7 @@ create table grocery
 (
     id      serial      primary key,
     name    varchar(500)    not null,
-    description     varchar(1000),
-    store_id    int    default null,
-    foreign key (store_id) references store(id)
+    description     varchar(1000)
 );
 create table grocery_item
 (
@@ -57,6 +55,8 @@ create table grocery_item
     notes   varchar   default null,
     actual_price          decimal                  default 0,
     estimated_price          decimal                  default 0,
+    store_id    int    default null,
     foreign key (grocery_id) references grocery(id),
-    foreign key (product_id) references product(id)
+    foreign key (product_id) references product(id),
+    foreign key (store_id) references store(id)
 );

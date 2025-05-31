@@ -35,6 +35,10 @@ public class GroceryItemEntity {
     @JoinColumn(name = "grocery_id")
     private GroceryEntity grocery;
 
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private StoreEntity store;
+
     private Float quantity;
     private String notes;
     private Long actualPrice;
