@@ -60,6 +60,31 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @Order(2)
+    @DisplayName("Get All Products with a query param")
+    @Description("Scenario: URI has a 'search' query parameter" +
+            "Given GET v1/products is the endpoint" +
+            "And it has a query param" +
+            "When GET endpoint is called" +
+            "Then it will send the list of filtered products by search query param")
+    public void getProductsWithQueryParam() {
+        // setup
+        String productToSearch = "query-products";
+        productTestHelper.setupProduct(productToSearch);
+        String productUriWithQueryParam = PRODUCTS_URI.concat("?search=query");
+
+        // when
+        ParameterizedTypeReference<List<ProductImport>> responseType = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<ProductImport>> response = restTemplate
+                .exchange(productUriWithQueryParam, HttpMethod.GET, null, responseType);
+
+        // then
+        List<ProductImport> productImportList = response.getBody();
+        assertThat(productImportList).hasSize(1);
+        assertThat(productImportList.get(0).getName()).contains(productToSearch);
+    }
+
+    @Test
+    @Order(3)
     @DisplayName("Post Products")
     @Description("Scenario: Happy Path" +
             "Given POST v1/products/import is the endpoint" +

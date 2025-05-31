@@ -38,18 +38,18 @@ public class ProductTestHelper {
         storeTestHelper.setupStore(format(baseName, "store-name"));
         CategoryEntity categoryEntity = categoryTestHelper.setupCategory(format(baseName, "category-name"));
         SubcategoryEntity subcategoryEntity = subcategoryTestHelper.setupSubcategoryWithCategory(format(baseName, "subcategory-name"), categoryEntity.getId());
-        return setupProductsWithCategoryAndSubcategory(categoryEntity, subcategoryEntity);
+        return setupProductsWithCategoryAndSubcategory(baseName, categoryEntity, subcategoryEntity);
     }
 
     // special use in GroceryControllerIntegrationTest
-    public ProductEntity setupProductsWithCategoryAndSubcategory(CategoryEntity category, SubcategoryEntity subcategory) {
-        ProductEntity productEntityToSave = createProduct(category, subcategory);
+    public ProductEntity setupProductsWithCategoryAndSubcategory(String name, CategoryEntity category, SubcategoryEntity subcategory) {
+        ProductEntity productEntityToSave = createProduct(name, category, subcategory);
         return productRepository.save(productEntityToSave);
     }
 
-    public ProductEntity createProduct(CategoryEntity category, SubcategoryEntity subcategory) {
+    public ProductEntity createProduct(String name, CategoryEntity category, SubcategoryEntity subcategory) {
         return ProductEntity.builder()
-                .name("New product 1")
+                .name(name)
                 .category(category)
                 .subcategory(SubcategoryEntity.builder()
                         .category(category)
