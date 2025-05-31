@@ -14,6 +14,7 @@ import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.utils.ProductUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +34,10 @@ public class ProductService {
     private final SubcategoryRepository subcategoryRepository;
     private final PurchaseHistoryRepository purchaseHistoryRepository;
 
-    public List<Product> getProducts() {
-        return productRepository.findAll().stream()
-                .map(ProductUtil::convertEntityToProduct)
-                .collect(Collectors.toList());
+    public List<Product> getProducts(Optional<String> searchQuery, Pageable pageable) {
+        return searchQuery
+                .map(search -> getProductByName(search, pageable))
+                .orElseGet(this::getAllProduct);
     }
 
     public ProductImport importProduct(ProductImport productImport) {
@@ -67,6 +68,19 @@ public class ProductService {
     public List<ProductImport> importMultipleProducts(List<ProductImport> productList) {
         return productList.stream()
                 .map(this::importProduct)
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getProductByName(String name, Pageable pageable) {
+        return productRepository
+                .searchAllByNameContainingIgnoreCase(name, pageable)
+                .getContent().stream()
+                .map(ProductUtil::convertEntityToProduct)
+                .collect(Collectors.toList());
+    }
+    private List<Product> getAllProduct() {
+        return productRepository.findAll().stream()
+                .map(ProductUtil::convertEntityToProduct)
                 .collect(Collectors.toList());
     }
 

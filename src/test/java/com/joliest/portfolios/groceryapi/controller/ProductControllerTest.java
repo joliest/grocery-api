@@ -9,11 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Description;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,10 +29,13 @@ class ProductControllerTest {
     @Test
     @Description("when get products is called, it should return list of products")
     public void getProducts() {
+        // given
+        Pageable mockPageable = mock(Pageable.class);
+
         // when
         List<Product> expected = getMockProducts();
-        when(productService.getProducts()).thenReturn(getMockProducts());
-        List<Product> actual = productController.getProducts();
+        when(productService.getProducts(Optional.of("s"), mockPageable)).thenReturn(getMockProducts());
+        List<Product> actual = productController.getProducts(Optional.of("s"), mockPageable);
 
         // then
         assertEquals(expected, actual);

@@ -13,12 +13,14 @@ import com.joliest.portfolios.groceryapi.domain.repository.SubcategoryRepository
 import com.joliest.portfolios.groceryapi.model.Product;
 import com.joliest.portfolios.groceryapi.model.ProductImport;
 import com.joliest.portfolios.groceryapi.model.PurchaseHistory;
+import com.joliest.portfolios.groceryapi.testHelper.MockHelpers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,11 +30,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
+
     @Mock
     private ProductRepository productRepository;
     @Mock
@@ -48,14 +52,42 @@ class ProductServiceTest {
 
     private static final String MOCK_STRING_DATE_1 = "04-21-2023";
     private static final String MOCK_STRING_DATE_2 = "05-13-2023";
+    private static final String MOCK_QUERY = "query";
 
     @Test
-    @DisplayName("When get products is called, Then it'll return the products")
+    @DisplayName("Given search query is empty" +
+            "When get products is called" +
+            "Then it returns all the products")
     void getProducts() {
+        // given
+        Optional<String> empty = Optional.empty();
+        Pageable mockPageable = mock(Pageable.class);
+
+
         // when
         List<ProductEntity> productsStream = getMockProductEntities();
         when(productRepository.findAll()).thenReturn(productsStream);
-        List<Product> actual = productService.getProducts();
+        List<Product> actual = productService.getProducts(empty, mockPageable);
+
+        // then
+        List<Product> expected = getMockListOfProducts();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Given search query is present" +
+            "When get products is called" +
+            "Then it returns products by query")
+    void getProductsBySearchQuery() {
+        // given
+        Optional<String> query = Optional.of(MOCK_QUERY);
+        Pageable mockPageable = mock(Pageable.class);
+
+        // when
+        List<ProductEntity> productsStream = getMockProductEntities();
+        when(productRepository.searchAllByNameContainingIgnoreCase(query.get(), mockPageable))
+                .thenReturn(MockHelpers.mockSlice(productsStream));
+        List<Product> actual = productService.getProducts(query, mockPageable);
 
         // then
         List<Product> expected = getMockListOfProducts();
