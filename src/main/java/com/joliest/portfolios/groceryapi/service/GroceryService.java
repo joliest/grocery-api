@@ -16,9 +16,12 @@ import com.joliest.portfolios.groceryapi.model.GroceryItem;
 import com.joliest.portfolios.groceryapi.utils.GroceryUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.joliest.portfolios.groceryapi.utils.CommonUtils.defaultIfNull;
 
 @Service
 @RequiredArgsConstructor
@@ -70,5 +73,19 @@ public class GroceryService {
     public Grocery getGroceryById(Integer id) {
         Optional<GroceryEntity> fetchedGrocery = groceryRepository.findById(id);
         return fetchedGrocery.map(GroceryUtil::convertEntityToGrocery).orElse(null);
+    }
+
+    @Transactional
+    public GroceryItem updateGroceryItemById(Integer groceryItemId, GroceryItemRequestModel requestBody) {
+        GroceryItemEntity groceryEntity = groceryItemRepository.findById(groceryItemId)
+                .orElseThrow(() -> new NotFoundException("Invalid grocery item id"));
+
+        GroceryItemEntity groceryItemToUpdate = groceryEntity.toBuilder()
+                .quantity(defaultIfNull(requestBody.getQuantity(), groceryEntity.getQuantity()))
+                .build();
+
+        GroceryItemEntity updatedGroceryItem = groceryItemRepository.save(groceryItemToUpdate);
+        return GroceryUtil.convertEntityToGroceryItem(updatedGroceryItem);
+
     }
 }
