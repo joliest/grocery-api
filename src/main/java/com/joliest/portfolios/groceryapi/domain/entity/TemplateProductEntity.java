@@ -20,20 +20,20 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name="SEQ_COMPONENT_PRODUCT", sequenceName = "component_product_id_seq", allocationSize = 1)
-@Table(name = "component_product")
-public class ComponentProductEntity {
+@SequenceGenerator(name="SEQ_TEMPLATE_PRODUCT", sequenceName = "template_product_id_seq", allocationSize = 1)
+@Table(name = "template_product")
+public class TemplateProductEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_COMPONENT_PRODUCT")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_TEMPLATE_PRODUCT")
     private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
-    @Column(name = "component_id")
-    private Integer componentId;
+    @Column(name = "template_id")
+    private Integer templateId;
     private Integer quantity;
 
     private Boolean included;

@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComponentModel {
+public class TemplateModel {
     private Integer id;
     private String name;
     private String description;

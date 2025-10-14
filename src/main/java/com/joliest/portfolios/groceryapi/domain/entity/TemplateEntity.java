@@ -25,17 +25,17 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@SequenceGenerator(name="SEQ_COMPONENT", sequenceName = "component_id_seq", allocationSize = 1)
-@Table(name = "component")
-public class ComponentEntity {
+@SequenceGenerator(name="SEQ_TEMPLATE", sequenceName = "template_id_seq", allocationSize = 1)
+@Table(name = "template")
+public class TemplateEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_COMPONENT")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_TEMPLATE")
     private Integer id;
     private String name;
     private String description;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "component_id")
-    private List<ComponentProductEntity> list = new ArrayList<>();
+    @JoinColumn(name = "template_id")
+    private List<TemplateProductEntity> list = new ArrayList<>();
 }
